@@ -1,0 +1,83 @@
+# AI PDM Leadership Council
+
+## Core Idea
+
+Junior and mid-level Product Managers often encounter situations they have never seen before.
+
+Example:
+
+> “My engineering team keeps pushing back on my roadmap. What should I do?”
+
+Instead of generic advice, the system retrieves relevant thinking from experienced product leaders.
+
+Possible knowledge sources include:
+
+- Lenny Rachitsky
+- Shreyas Doshi
+- Julie Zhuo
+- Gibson Biddle
+- Teresa Torres
+- Marty Cagan
+- Brian Chesky
+- Elena Verna
+- Casey Winters
+- other experienced product leaders
+
+## Example Response
+
+### Your Situation
+
+Engineering disagrees with roadmap priorities.
+
+### Perspective 1
+
+Clarify whether the disagreement is about:
+
+- expected impact
+- execution complexity
+- product strategy
+- technical risk
+- prioritization
+
+### Perspective 2
+
+Bring engineers earlier into discovery rather than presenting a completed roadmap.
+
+### Recommended Actions
+
+1. Run a problem-framing session.
+2. Share customer evidence.
+3. Ask engineers to propose alternative solutions.
+4. Agree on success metrics before debating implementation.
+5. Separate disagreement about the problem from disagreement about the solution.
+
+## Product Modes
+
+### Ask an Expert
+
+The PM can select a specific expert.
+
+Examples:
+
+- Ask Shreyas
+- Ask Elena
+- Ask Brian
+- Ask Teresa
+
+### Ask the Product Council
+
+Multiple expert perspectives are retrieved and compared.
+
+Example:
+
+> “How would three experienced product leaders approach this problem differently?”
+
+## Why This Is Strong for RAG
+
+Your RAG system is no longer simply retrieving documents.
+
+It becomes a **virtual product mentor** grounded in real expert thinking.
+
+Potential positioning:
+
+> Learn how great product leaders think.

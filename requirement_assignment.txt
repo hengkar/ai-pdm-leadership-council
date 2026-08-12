@@ -1,0 +1,55 @@
+In this final part of the course, you will build and submit your own advanced LLM app. We will review your product and code at a high level to ensure it works and to award you the course certification. 
+
+This final project must be a project or product that leverages RAG and a subset of the techniques taught in the course. For example, it could be a custom version of our own AI tutor chatbot from our code in part 1, but with a new knowledge base that is expanded and filtered using the techniques we teach. You could implement advanced RAG techniques, tune the project for a specific domain, or add other generative AI functionalities. We highly encourage you to think of a different and original application that matches your interests or industry experience. This could be a tutor for education in another industry, a more in-depth RAG research assistant, a customer support chatbot, or a pipeline to collect, clean, structure, and search unstructured data, among many other possibilities! We only ask that the project makes use of RAG within the tech stack and uses foundation model LLMs (which can be fine-tuned, but not your own trained machine learning models). Moreover, the project must be released on a public Hugging Face Space so that we can easily test it and review the code.
+
+If you have front-end development skills or contacts, you could also release your project via a custom UI/UX, but it should always be on a public Hugging Face Space (e.g., by using Docker Spaces or Static HTML Spaces).
+
+You may also choose to release a version of your app on the GPT Store for broader distribution - but a GPT alone will not be reviewed or count towards your project certification.
+
+Final Project Requirements
+For the final project, we are providing a list of necessary constraints and a list of optional functionalities. In order to get your course certification, your project must satisfy all the necessary constraints. You may choose to fulfill any of the listed optional functionalities at your discretion — they are helpful for practicing and reviewing what you learned in the course. Moreover, they contribute to a stronger project for your portfolio.
+
+Here are the necessary constraints that you must follow in your project:
+
+It must be a RAG project written in Python. We suggest forking or cloning this repository as a starting point for your project if you plan to use Gradio as the UI, but it’s not strictly required.
+The project must use at least one LLM (either local or managed via API key).
+It must be deployed on a public Hugging Face Space.
+If you write code for data collection and curation, include the scripts in the project repository.
+It must contain a README file with a textual explanation of the project.
+You must NOT put your API keys in the project folder. Add a UI element where the user can paste an API key for one of the following LLM providers: OpenAI, Google Gemini, and Claude.
+Do NOT add costly pipelines in your code that will be run with the user API key. For example, it’s fine to use the API key to write the RAG answers in the order of 10k tokens, but it’s not fine to use the API key to process 100 images on the fly for example.
+In the README, add a quick cost estimation that the user will incur when trying your project with their API keys. You should show that the user can try all the functionalities with $0.50 or less.
+The README file must list all the API keys (e.g., “OpenAI API key,” not the key itself) that the user has to input to use the app.
+It must also include at least 5 of the optional functionalities listed below. Write them in your README.
+Here are optional functionalities you may want to implement in your RAG project - make sure at least 5 of these are implemented in your product. You may implement many more than 5 to achieve a product that works to your satisfaction.
+
+Implement streaming responses.
+Uses dynamic few-shot prompting, where the best examples are selected according to the user query.
+There’s code for RAG evaluation in the folder, and the README contains the evaluation results. The folder must also contain the evaluation dataset and the evaluation scripts.
+The app is designed for a specific goal/domain that is not a tutor about AI. For example, it could be about finance, healthcare, etc.
+Use live search results. In this case, the user must also input the API keys for the relevant APIs (e.g., Perplexity, Bing search, etc.).
+You have shown evidence of collecting at least two data sources beyond those provided in our course. 
+Your data collection and curation process leverages structured JSON outputs, which are used for advanced RAG functionalities in your app.
+Your data collection and curation process leverages images and/or PDFs. The parsed data should be useful for some use cases in your app.
+The app can generate images on the fly. They must be pertinent to the scope of your app.
+Use a reranker in your RAG pipeline. It can be a fine-tuned version (your choice).
+Use hybrid search in your RAG pipeline.
+Use metadata filtering.
+Use a fine-tuned LLM in your app.
+Use a fine-tuned embedding model in your app. 
+Your RAG pipeline includes query routing.
+Your query pipeline includes function calling.
+Your app manages speech inputs.
+Your app manages speech outputs.
+Your app appropriately leverages context caching (also known as prompt caching). Explain in the README how you designed your prompts to be adequate for context caching.
+We hope this project and certification will serve you either as:
+
+A portfolio project for landing a job as an LLM Developer (for one of the 10,000+ live AI jobs requiring parts of this skill set listed on our AI jobs board)
+The foundation for bringing LLM skills into your current job and leading a new LLM project or team at your company. This project could even be a Proof of Concept (PoC) for your company or clients.
+The seed of your revenue-generating side project, an ambitious startup, or a personal tool for your admin or hobbies.
+How to Share Your Project
+First, double-check that your Hugging Face Space is public.
+
+In the next lesson, you must attach a .txt file where you will include this link together with a link to your GitHub and a list of the optional techniques you used.
+
+We’ll get back to you within two weeks after receiving your project. If the checks are positive, we’ll award your certification via the course platform. Otherwise, we’ll give feedback on what is missing to achieve the certification.
