@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 
 import app
-from rag.config import Provider
+from rag.config import ENABLED_PROVIDERS, PROVIDER_LABELS, Provider
 from rag.errors import KeyStatus
 
 
@@ -64,12 +64,19 @@ def test_typing_a_new_key_replaces_the_old_one() -> None:
     assert state.is_ready
 
 
-def test_switching_provider_revokes_the_key() -> None:
+def test_switching_provider_revokes_the_key(monkeypatch: pytest.MonkeyPatch) -> None:
     """FR-023 / US3 scenario 5 — a key for one provider is not valid for another.
 
     Without this the dropdown could read "Anthropic" while the session quietly
     kept using the validated OpenAI key.
+
+    The provider table is restored for this test rather than using whatever
+    ENABLED_PROVIDERS currently ships. Withholding a provider from the UI is a
+    presentation decision, and it must not quietly retire the revocation
+    guarantee that has to hold the moment one is offered again.
     """
+    monkeypatch.setitem(app._LABEL_TO_PROVIDER, "Anthropic Claude", Provider.CLAUDE)
+
     state = _validated()
     assert state.provider is Provider.OPENAI
 
@@ -125,3 +132,26 @@ def test_connect_is_the_only_path_that_validates() -> None:
     source = open("app.py", encoding="utf-8").read()
     assert "key_box.blur" not in source, "validation must not hang off blur"
     assert "connect_btn.click(connect" in source
+
+
+def test_withheld_providers_cannot_be_selected() -> None:
+    """A provider absent from ENABLED_PROVIDERS must be unreachable, not merely
+    hidden.
+
+    The dropdown is client-side, so an edited page or a replayed request can
+    still submit any label. Resolution has to reject a withheld provider rather
+    than trusting the widget to have limited the choice.
+    """
+    for provider in Provider:
+        label = PROVIDER_LABELS[provider]
+        if provider in ENABLED_PROVIDERS:
+            assert app._LABEL_TO_PROVIDER[label] is provider
+        else:
+            assert label not in app._LABEL_TO_PROVIDER, (
+                f"{label} is withheld but still resolvable"
+            )
+
+
+def test_a_forged_provider_label_falls_back_to_an_enabled_one() -> None:
+    state, _, _, _ = app.switch_provider("Anthropic Claude", None)
+    assert state.provider in ENABLED_PROVIDERS

@@ -21,14 +21,25 @@ import gradio as gr
 import rag
 import ui_content
 from rag import roster
-from rag.config import PROVIDER_KEY_URLS, PROVIDER_LABELS, PROVIDER_MODELS, Mode, Provider
+from rag.config import (
+    DEFAULT_PROVIDER,
+    ENABLED_PROVIDERS,
+    PROVIDER_KEY_URLS,
+    PROVIDER_LABELS,
+    PROVIDER_MODELS,
+    Mode,
+    Provider,
+)
 from rag.errors import KEY_STATUS_MESSAGES, KeyStatus, install_log_scrubbing
 from rag.llm import make_client
 from rag.pipeline import EventType, answer
 
 install_log_scrubbing()
 
-_LABEL_TO_PROVIDER = {label: provider for provider, label in PROVIDER_LABELS.items()}
+# Built from ENABLED_PROVIDERS rather than every known label, so a withheld
+# provider cannot be reached by editing the page or replaying an old request:
+# an unrecognised label falls back to the default instead.
+_LABEL_TO_PROVIDER = {PROVIDER_LABELS[p]: p for p in ENABLED_PROVIDERS}
 COUNCIL_LABEL = "Ask the Council"
 EXPERT_LABEL = "Ask an Expert"
 
@@ -37,7 +48,7 @@ EXPERT_LABEL = "Ask an Expert"
 class SessionState:
     """One visitor's session. Dies with the browser tab."""
 
-    provider: Provider = Provider.OPENAI
+    provider: Provider = DEFAULT_PROVIDER
     api_key: str = ""
     key_status: KeyStatus | None = None
     history: list[dict[str, str]] = field(default_factory=list)
@@ -64,7 +75,7 @@ def connect(provider_label: str, api_key: str, state: SessionState | None):
     the key unless the user asks for it to.
     """
     state = state or SessionState()
-    state.provider = _LABEL_TO_PROVIDER.get(provider_label, Provider.OPENAI)
+    state.provider = _LABEL_TO_PROVIDER.get(provider_label, DEFAULT_PROVIDER)
     typed = (api_key or "").strip()
 
     if not typed:
@@ -102,7 +113,7 @@ def switch_provider(provider_label: str, state: SessionState | None):
     kept using the previously validated OpenAI key.
     """
     state = state or SessionState()
-    provider = _LABEL_TO_PROVIDER.get(provider_label, Provider.OPENAI)
+    provider = _LABEL_TO_PROVIDER.get(provider_label, DEFAULT_PROVIDER)
 
     if provider is not state.provider:
         state.provider = provider
@@ -247,9 +258,11 @@ def build_ui() -> gr.Blocks:
             with gr.Column(scale=1, min_width=270):
                 gr.Markdown("### Setup")
                 provider_picker = gr.Dropdown(
-                    choices=list(PROVIDER_LABELS.values()),
-                    value=PROVIDER_LABELS[Provider.OPENAI],
+                    choices=[PROVIDER_LABELS[p] for p in ENABLED_PROVIDERS],
+                    value=PROVIDER_LABELS[DEFAULT_PROVIDER],
                     label="AI provider",
+                    info=None if len(ENABLED_PROVIDERS) > 1 else
+                    "Gemini and Claude are temporarily unavailable.",
                 )
                 key_box = gr.Textbox(
                     label="API key", type="password", placeholder="sk-…",
@@ -258,7 +271,7 @@ def build_ui() -> gr.Blocks:
                 with gr.Row():
                     connect_btn = gr.Button("Connect", variant="primary", size="sm")
                     disconnect_btn = gr.Button("Disconnect", size="sm")
-                key_link = gr.Markdown(_key_link(PROVIDER_LABELS[Provider.OPENAI]))
+                key_link = gr.Markdown(_key_link(PROVIDER_LABELS[DEFAULT_PROVIDER]))
                 status = gr.HTML(_status_html(None))
                 gr.Markdown(f"<small>{ui_content.KEY_NOTE}</small>")
 
@@ -335,7 +348,7 @@ def build_ui() -> gr.Blocks:
 
 
 def _key_link(provider_label: str) -> str:
-    provider = _LABEL_TO_PROVIDER.get(provider_label, Provider.OPENAI)
+    provider = _LABEL_TO_PROVIDER.get(provider_label, DEFAULT_PROVIDER)
     return (
         f"<small>Get a key: [{PROVIDER_LABELS[provider]}]({PROVIDER_KEY_URLS[provider]}) "
         f"· uses `{PROVIDER_MODELS[provider]}`</small>"

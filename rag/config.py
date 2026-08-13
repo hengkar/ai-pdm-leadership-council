@@ -75,6 +75,21 @@ PROVIDER_LABELS: dict[Provider, str] = {
     Provider.CLAUDE: "Anthropic Claude",
 }
 
+# Which providers the UI actually offers.
+#
+# All three adapters are implemented and contract-tested, but only OpenAI has
+# been exercised against a live endpoint. Offering an untested path invites a
+# first-time user to hit its first real request, so the untested two are
+# withheld until they have been run for real. This is presentation only —
+# `make_client` still builds any provider, so the adapters and their tests stay
+# live rather than rotting behind a flag.
+#
+# To re-enable, add them back to this tuple. Nothing else needs to change.
+ENABLED_PROVIDERS: tuple[Provider, ...] = (Provider.OPENAI,)
+
+# What the UI falls back to for an unknown or withheld provider label.
+DEFAULT_PROVIDER: Provider = ENABLED_PROVIDERS[0]
+
 # Where each provider's keys are issued, shown next to the key field.
 PROVIDER_KEY_URLS: dict[Provider, str] = {
     Provider.OPENAI: "https://platform.openai.com/api-keys",

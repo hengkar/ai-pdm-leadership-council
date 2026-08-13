@@ -44,13 +44,17 @@ Paste a key in the sidebar, pick a mode, and ask.
 
 ### API keys you need
 
-Exactly one of these, chosen from the sidebar dropdown:
+One OpenAI API key:
 
 | Provider | Key name | Model used | Get one |
 |---|---|---|---|
 | OpenAI | OpenAI API key | `gpt-4o-mini` | https://platform.openai.com/api-keys |
-| Google Gemini | Google Gemini API key | `gemini-2.0-flash` | https://aistudio.google.com/apikey |
-| Anthropic | Anthropic API key | `claude-haiku-4-5` | https://console.anthropic.com/settings/keys |
+
+Google Gemini (`gemini-2.0-flash`) and Anthropic (`claude-haiku-4-5`) adapters
+are implemented and contract-tested, but neither has been exercised against a
+live endpoint, so they are withheld from the dropdown rather than offered
+untested. Re-enable them by adding them to `ENABLED_PROVIDERS` in
+`rag/config.py`; no other change is required.
 
 Your key lives in browser-session memory only. It is never written to disk,
 never logged (an active scrubber redacts anything key-shaped from log records),
@@ -70,7 +74,7 @@ index ships prebuilt. Your key pays for two calls per question.
 | Answer generation | ~2,900 in / ~700 out | ~$0.0008 |
 | **Total per question** | | **~$0.001** |
 
-Measured on `gpt-4o-mini`; Gemini Flash and Claude Haiku are comparable. Asking
+Measured on `gpt-4o-mini`. Asking
 15 questions — enough to exercise both modes, the citations, and the edge cases
 — costs roughly **$0.015**. Off-topic questions are turned away by the router
 before any generation happens, so they cost about $0.00005.

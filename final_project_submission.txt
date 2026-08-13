@@ -131,10 +131,17 @@ syncs this repository to the Space on every push to main.
 
   Still open:
 
-  [ ] Exercise Gemini and Anthropic on the live Space. Both adapters are
-      contract-tested and only OpenAI has been run end to end, so a reviewer
-      choosing either one would be its first live exercise. A few cents covers
-      this.
+  [X] Gemini and Anthropic are withheld from the provider dropdown. Both
+      adapters are implemented and contract-tested, but neither has ever made a
+      live call, and a reviewer choosing one would have been its first real
+      request. Rather than delete them, ENABLED_PROVIDERS in rag/config.py
+      lists which providers the UI offers; the adapters and their tests stay
+      live behind it. Resolution is built from that list, so a withheld
+      provider is unreachable even by editing the page or replaying a request,
+      and two tests pin that down. Re-enable by adding them back to the tuple.
+
+  [ ] Optional: exercise Gemini and Anthropic live, then re-enable them. A few
+      cents covers it and would restore the three-provider choice.
 
   [ ] Rotate the OpenAI API key used during development.
 
