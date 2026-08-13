@@ -110,8 +110,8 @@ speech I/O, and prompt caching. Prompt caching in particular was designed for
 is deliberately not claimed.
 
 
-5. DEPLOYMENT STATUS AND WHAT REMAINS
--------------------------------------
+5. DEPLOYMENT
+-------------
 
 Deployment runs through a GitHub Actions workflow (huggingface/hub-sync) that
 syncs this repository to the Space on every push to main.
@@ -121,36 +121,25 @@ syncs this repository to the Space on every push to main.
     - the README pin of Gradio 5.50.0 took effect over the Space default
     - Connect accepted an OpenAI key and reported "Your key is held for this
       session only"; no key is stored, logged, or committed
-    - the council sidebar loaded all 8 experts and 31 works, proving the
-      roster reads correctly from the committed index on a clean deployment
+    - the council sidebar loaded all 8 experts and 31 works, proving the roster
+      reads correctly from the committed index on a clean deployment
     - "Ask the Council" answered a roadmap-pushback question in the required
       structure and cited three distinct experts with working links
-    - one citation rendered as a bare podcast reference with no episode title
-      or timestamp — the deliberate suppression for works whose upstream
-      episode metadata could not be verified, behaving correctly in production
+    - one citation rendered as a bare podcast reference with no episode title or
+      timestamp — the deliberate suppression for works whose upstream episode
+      metadata could not be verified, behaving correctly in production
 
-  Still open:
+  Provider availability. The UI offers OpenAI only. The Gemini and Anthropic
+  adapters are implemented and contract-tested, but neither has been exercised
+  against a live endpoint, and a reviewer selecting one would have been making
+  its first real request. Rather than delete them, ENABLED_PROVIDERS in
+  rag/config.py declares which providers the UI offers, and the adapters and
+  their tests stay live behind it. The dropdown is client-side, so the gate is
+  in provider resolution rather than display: a withheld provider is
+  unreachable even by editing the page or replaying a request, and two tests
+  pin that down. Re-enabling is a one-line change to that tuple.
 
-  [X] Gemini and Anthropic are withheld from the provider dropdown. Both
-      adapters are implemented and contract-tested, but neither has ever made a
-      live call, and a reviewer choosing one would have been its first real
-      request. Rather than delete them, ENABLED_PROVIDERS in rag/config.py
-      lists which providers the UI offers; the adapters and their tests stay
-      live behind it. Resolution is built from that list, so a withheld
-      provider is unreachable even by editing the page or replaying a request,
-      and two tests pin that down. Re-enable by adding them back to the tuple.
-
-  [ ] Optional: exercise Gemini and Anthropic live, then re-enable them. A few
-      cents covers it and would restore the three-provider choice.
-
-  [ ] Rotate the OpenAI API key used during development.
-
-  [ ] Optional: drop the hardware tier from CPU Upgrade to CPU basic. CPU
-      Upgrade bills hourly; CPU basic is free and its 16 GB is ample for the
-      roughly 1.25 GB of weights this app loads. The paid tier buys faster
-      reranking, not feasibility.
-
-  Deployment notes — four issues were found and fixed getting here:
+  Four deployment issues were found and fixed getting here:
 
     1. The build-time vector store was 12.9 MB, over the Hub's 10 MB limit for
        files not tracked by Git LFS. Rather than adopt LFS, the build now ships
