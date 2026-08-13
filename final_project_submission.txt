@@ -1,0 +1,184 @@
+AI PDM LEADERSHIP COUNCIL — FINAL PROJECT SUBMISSION
+=====================================================
+
+⚠️  NOT READY TO SUBMIT YET — one mandatory requirement is outstanding.
+
+    The project must be deployed to a PUBLIC Hugging Face Space, and it is not
+    deployed yet. Deployment needs a Hugging Face account and token that were
+    not available while building. Everything else is complete.
+
+    Fill in the Space URL below once deployed, delete this notice, and submit.
+
+
+1. LINKS
+--------
+
+Hugging Face Space (PUBLIC):   [ NOT YET DEPLOYED — see section 5 ]
+GitHub repository:             [ https://github.com/hengkar/ai-pdm-leadership-council.git ]
+
+
+2. WHAT THE PROJECT IS
+----------------------
+
+A RAG application that gives product managers situational advice grounded in the
+published thinking of experienced product leaders, with every claim cited back
+to the original source.
+
+A PM describes a real situation ("my engineering team keeps pushing back on my
+roadmap"). The app retrieves how eight product leaders have actually written and
+spoken about problems like it, then presents where they agree, where they
+differ, and concrete next steps.
+
+Two modes:
+  - Ask the Council — several experts' perspectives, contrasted
+  - Ask an Expert   — one expert, answered only from their own material
+
+Corpus: 31 works, 183,574 words, 775 indexed passages, 8 product leaders
+        (Brian Chesky, Casey Winters, Elena Verna, Gibson Biddle, Julie Zhuo,
+        Marty Cagan, Shreyas Doshi, Teresa Torres)
+
+
+3. API KEYS THE USER MUST PROVIDE
+---------------------------------
+
+Exactly one of the following, pasted into the app's sidebar and confirmed with
+a "Connect" button. The app ships with no key of its own.
+
+  - OpenAI API key         (uses gpt-4o-mini)
+  - Google Gemini API key  (uses gemini-2.0-flash)
+  - Anthropic API key      (uses claude-haiku-4-5)
+
+Cost to try everything: approximately US$0.015 for 15 questions — about
+$0.001 per question. Comfortably under the $0.50 limit. Retrieval, embedding
+and reranking all run locally at no cost to the user; the key pays only for
+routing and answer generation. Off-topic questions are turned away by the
+router before any generation, costing roughly $0.00005.
+
+
+4. OPTIONAL FUNCTIONALITIES IMPLEMENTED (11 — requirement is 5)
+---------------------------------------------------------------
+
+ 1. Streaming responses
+    Answers stream token by token. rag/llm.py stream() on all three adapters.
+
+ 2. Domain-specific application (not an AI tutor)
+    Product-management leadership advice.
+
+ 3. Evidence of two or more data sources beyond the course
+    (a) Experts' own blogs via public RSS — Product Talk, caseyaccidental.com
+    (b) A public GitHub archive of Lenny's Podcast transcripts, pinned to a
+        commit SHA for reproducibility
+    data_collection/sources.yaml, data_collection/fetch.py
+
+ 4. Data curation leverages structured JSON outputs used for advanced RAG
+    Enrichment tags every work with topics from a 27-term controlled vocabulary
+    compiled into the response schema as an enum, so an off-vocabulary tag is
+    impossible rather than merely detected. Those tags drive metadata filtering.
+    data_collection/enrich.py, data_collection/vocabulary.py
+
+ 5. Reranker
+    Local BAAI/bge-reranker-base cross-encoder over fused candidates.
+    rag/rerank.py
+
+ 6. Hybrid search
+    Dense embeddings (BAAI/bge-small-en-v1.5) + BM25, combined with reciprocal
+    rank fusion. rag/retrieve.py
+
+ 7. Metadata filtering
+    Expert and content-type filters applied at the retrieval layer, on both the
+    dense and sparse paths. This is what makes "Ask an Expert" a guarantee
+    rather than a request. rag/retrieve.py
+
+ 8. Query routing
+    Typed classification into pm_question / off_topic / expert_mentioned before
+    any retrieval or generation. rag/router.py
+
+ 9. Function calling
+    Routing uses each provider's structured-output mode, so the route arrives as
+    a typed value rather than prose to be parsed. rag/llm.py classify()
+
+10. Dynamic few-shot prompting
+    Exemplars selected per question by embedding similarity, rather than sending
+    all of them. rag/prompts.py select_exemplars()
+
+11. RAG evaluation with dataset, scripts and results
+    33 hand-written PM questions, ablation across three retrieval strategies,
+    plus an LLM-judge faithfulness pass. evaluation/
+
+NOT claimed: PDF parsing, image generation, live search, fine-tuned models,
+speech I/O, and prompt caching. Prompt caching in particular was designed for
+(static-first prompt ordering) but never verified to produce cache hits, so it
+is deliberately not claimed.
+
+
+5. WHAT REMAINS BEFORE SUBMITTING
+---------------------------------
+
+  [ ] Deploy to a public Hugging Face Space (Gradio SDK).
+      Ship: app.py, ui_content.py, rag/, data/chunks.jsonl, data/index/,
+            requirements.txt, README.md
+      Do NOT ship: .env, data/raw/, data/curated/
+      Then confirm the Space is set to PUBLIC.
+
+  [ ] Verify on the live Space: paste a key, press Connect, ask a question,
+      and check that a cited answer comes back.
+
+  [ ] Push the repository to GitHub and add both URLs to section 1 above.
+
+  [ ] Rotate the OpenAI API key that was used during development.
+
+
+6. EVALUATION RESULTS
+---------------------
+
+Retrieval (33 questions, scored per source work; ground truth from topic tags
+the ranker never sees):
+
+  strategy                              hit@5    hit@3    MRR
+  dense only                             91%      67%     0.593
+  hybrid (dense + BM25, RRF)             79%      79%     0.712
+  hybrid + cross-encoder rerank          91%      82%     0.629   <- shipped
+
+  Target was hit-rate@5 >= 80%. Met at 91%.
+
+  Reported honestly: adding BM25 lowers hit@5 versus plain dense retrieval while
+  improving hit@3 and MRR. Reranking recovers hit@5 and gives the best hit@3.
+  Since only five or six passages reach the prompt, hit@3 is the number that
+  matters — but the margin over plain dense search is modest.
+
+Answer faithfulness (10 council answers judged against their source excerpts):
+
+  grounded in excerpts    4.90 / 5
+  correct attribution     5.00 / 5
+  admits coverage gaps    4.90 / 5
+  first-person impersonation of an expert:  0 / 10
+
+Performance: first token in 3-5 seconds after a one-time ~17s model warmup.
+
+Tests: 163, all passing. None require an API key or spend money.
+
+
+7. NOTES ON SOURCING AND DATA QUALITY
+--------------------------------------
+
+Only publicly available material, modest volume per expert, always cited back to
+the original.
+
+Before fetching, the pipeline checks robots.txt including AI-specific opt-outs.
+One planned source — Marty Cagan's svpg.com — blocks every major AI crawler
+while allowing ordinary ones. That is a deliberate opt-out from exactly this
+kind of use, so the site was excluded rather than fetched under a different
+user-agent, and Cagan is represented through his podcast appearance instead.
+data_collection/robots.py enforces this for any source added later.
+
+Five works in the transcript archive have unreliable episode metadata upstream
+(different episodes sharing a video ID). Expert attribution is still sound,
+since it comes from the speaker labels inside the transcript, but episode
+identity is not. Those works keep their content and are cited without an episode
+title or timestamped link rather than making a claim the metadata cannot
+support.
+
+data/curated/ holds the full text of third-party articles and transcripts and is
+deliberately NOT committed — publishing it would redistribute other people's
+work in bulk, which is different from using it for retrieval. The collection
+scripts are committed, so the corpus is fully reproducible.
