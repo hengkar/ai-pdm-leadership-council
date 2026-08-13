@@ -35,6 +35,18 @@ RERANKER_MODEL = "BAAI/bge-reranker-base"
 # --- Providers -------------------------------------------------------------
 
 
+class Mode(str, Enum):
+    """Which product mode a question is asked in.
+
+    Defined here rather than imported from `data_collection.schemas`: the
+    runtime package must not depend on the offline pipeline (Principle II).
+    The two definitions are intentionally identical in value.
+    """
+
+    COUNCIL = "council"
+    EXPERT = "expert"
+
+
 class Provider(str, Enum):
     OPENAI = "openai"
     GEMINI = "gemini"

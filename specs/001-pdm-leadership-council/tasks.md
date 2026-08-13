@@ -96,18 +96,18 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 
 ### Tests for User Story 3
 
-- [ ] T022 [P] [US3] Contract tests for all three adapters against contracts/provider-protocol.md in `tests/contract/test_provider_protocol.py`: `validate_key` never raises, `classify` returns validated schema instances, `stream` yields deltas, and the uniform error taxonomy holds
-- [ ] T023 [P] [US3] Key-hygiene test in `tests/contract/test_key_hygiene.py`: the key appears in no `__repr__`, no exception message, and no log record across all three adapters
+- [X] T022 [P] [US3] Contract tests for all three adapters against contracts/provider-protocol.md in `tests/contract/test_provider_protocol.py`: `validate_key` never raises, `classify` returns validated schema instances, `stream` yields deltas, and the uniform error taxonomy holds
+- [X] T023 [P] [US3] Key-hygiene test in `tests/contract/test_key_hygiene.py`: the key appears in no `__repr__`, no exception message, and no log record across all three adapters
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] Define the `LLMClient` protocol, `Message`, and `ProviderName` types in `rag/llm.py` per contracts/provider-protocol.md
-- [ ] T025 [P] [US3] Implement the OpenAI adapter (`gpt-4o-mini`) in `rag/llm.py` with structured-output `classify` and streaming `stream`
-- [ ] T026 [P] [US3] Implement the Gemini adapter (`gemini-2.0-flash`) in `rag/llm.py`
-- [ ] T027 [P] [US3] Implement the Anthropic adapter (`claude-haiku-4-5`) in `rag/llm.py`
-- [ ] T028 [US3] Implement `make_client(provider, api_key)` and the ~1-token `validate_key` ping in `rag/llm.py`, mapping all provider failures to the shared `KeyStatus`/`ProviderError` taxonomy (FR-009)
-- [ ] T029 [US3] Implement `SessionState` in `app.py` as `gr.State` holding provider, key, and validation flag — never persisted, never echoed back into the field (FR-008, contracts/ui-contract.md)
-- [ ] T030 [US3] Build the Gradio Blocks shell in `app.py`: sidebar provider selector, masked key field, key-status indicator, and submit disabled until a key is present
+- [X] T024 [US3] Define the `LLMClient` protocol, `Message`, and `ProviderName` types in `rag/llm.py` per contracts/provider-protocol.md
+- [X] T025 [P] [US3] Implement the OpenAI adapter (`gpt-4o-mini`) in `rag/llm.py` with structured-output `classify` and streaming `stream`
+- [X] T026 [P] [US3] Implement the Gemini adapter (`gemini-2.0-flash`) in `rag/llm.py`
+- [X] T027 [P] [US3] Implement the Anthropic adapter (`claude-haiku-4-5`) in `rag/llm.py`
+- [X] T028 [US3] Implement `make_client(provider, api_key)` and the ~1-token `validate_key` ping in `rag/llm.py`, mapping all provider failures to the shared `KeyStatus`/`ProviderError` taxonomy (FR-009)
+- [X] T029 [US3] Implement `SessionState` in `app.py` as `gr.State` holding provider, key, and validation flag — never persisted, never echoed back into the field (FR-008, contracts/ui-contract.md)
+- [X] T030 [US3] Build the Gradio Blocks shell in `app.py`: sidebar provider selector, masked key field, key-status indicator, and submit disabled until a key is present
 
 **Checkpoint**: A key can be supplied and validated; generation is now possible
 
@@ -121,20 +121,20 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 
 ### Tests for User Story 1
 
-- [ ] T031 [P] [US1] Integration test for hybrid retrieval against the committed index in `tests/integration/test_retrieve.py`: RRF fusion returns relevant chunks for known PM questions and the council diversity cap yields ≥2 experts
-- [ ] T032 [P] [US1] Integration test for the pipeline event contract in `tests/integration/test_pipeline_events.py`: exactly one terminal outcome per call, `Sources` derived only from retrieved chunks, and no key in any payload (contracts/pipeline-events.md)
+- [X] T031 [P] [US1] Integration test for hybrid retrieval against the committed index in `tests/integration/test_retrieve.py`: RRF fusion returns relevant chunks for known PM questions and the council diversity cap yields ≥2 experts
+- [X] T032 [P] [US1] Integration test for the pipeline event contract in `tests/integration/test_pipeline_events.py`: exactly one terminal outcome per call, `Sources` derived only from retrieved chunks, and no key in any payload (contracts/pipeline-events.md)
 
 ### Implementation for User Story 1
 
-- [ ] T033 [US1] Implement `rag/roster.py`: build `RosterEntry` list by scanning committed index metadata at startup, excluding experts with zero chunks; never read `sources.yaml` or `data/curated/` at runtime (Constitution II, data-model.md)
-- [ ] T034 [US1] Implement hybrid retrieval in `rag/retrieve.py`: query embedding with the index-time model, dense top-30 from Chroma, sparse top-30 from BM25, RRF fusion (k=60), returning `RetrievalResult` objects carrying both ranks
-- [ ] T035 [US1] Implement `rag/rerank.py`: local `bge-reranker-base` cross-encoder over the fused top-20, per-expert diversity cap for council mode, and the score threshold that triggers a coverage gap instead of a weak answer
-- [ ] T036 [US1] Implement `rag/prompts.py`: council system prompt producing Situation → Perspectives → Recommended Actions, the ~10-exemplar few-shot library with embedding-similarity selection of 1–2, the no-impersonation and synthesize-don't-quote rules, and cache-friendly static-first ordering (FR-004, FR-006, research.md R11)
-- [ ] T037 [US1] Implement `rag/router.py`: typed classification via each provider's structured-output mode returning `pm_question | off_topic | expert_mentioned`, with unknown expert names falling back to `pm_question` (FR-012, research.md R6)
-- [ ] T038 [US1] Implement `rag/pipeline.py`: the `answer()` generator orchestrating route → retrieve → rerank → prompt → stream and emitting the full event taxonomy with its terminal-outcome and supersede guarantees (contracts/pipeline-events.md)
-- [ ] T039 [P] [US1] Write the ~4 `ExamplePrompt` entries and product framing copy in `ui_content.py`, covering situations the corpus actually addresses (FR-021)
-- [ ] T040 [US1] Wire the conversation surface in `app.py`: empty-state hero with clickable example cards, streaming answer rendering from `AnswerDelta`, and distinct visual treatments for `OffTopic`, `CoverageGap`, `KeyProblem`, and `Failure` (FR-010, FR-021, contracts/ui-contract.md rules 1–2)
-- [ ] T041 [US1] Render the sources list under each answer in `app.py` from the `Sources` event: expert, work title, and link for every contributing chunk (FR-011 baseline; deep-link polish in US4)
+- [X] T033 [US1] Implement `rag/roster.py`: build `RosterEntry` list by scanning committed index metadata at startup, excluding experts with zero chunks; never read `sources.yaml` or `data/curated/` at runtime (Constitution II, data-model.md)
+- [X] T034 [US1] Implement hybrid retrieval in `rag/retrieve.py`: query embedding with the index-time model, dense top-30 from Chroma, sparse top-30 from BM25, RRF fusion (k=60), returning `RetrievalResult` objects carrying both ranks
+- [X] T035 [US1] Implement `rag/rerank.py`: local `bge-reranker-base` cross-encoder over the fused top-20, per-expert diversity cap for council mode, and the score threshold that triggers a coverage gap instead of a weak answer
+- [X] T036 [US1] Implement `rag/prompts.py`: council system prompt producing Situation → Perspectives → Recommended Actions, the ~10-exemplar few-shot library with embedding-similarity selection of 1–2, the no-impersonation and synthesize-don't-quote rules, and cache-friendly static-first ordering (FR-004, FR-006, research.md R11)
+- [X] T037 [US1] Implement `rag/router.py`: typed classification via each provider's structured-output mode returning `pm_question | off_topic | expert_mentioned`, with unknown expert names falling back to `pm_question` (FR-012, research.md R6)
+- [X] T038 [US1] Implement `rag/pipeline.py`: the `answer()` generator orchestrating route → retrieve → rerank → prompt → stream and emitting the full event taxonomy with its terminal-outcome and supersede guarantees (contracts/pipeline-events.md)
+- [X] T039 [P] [US1] Write the ~4 `ExamplePrompt` entries and product framing copy in `ui_content.py`, covering situations the corpus actually addresses (FR-021)
+- [X] T040 [US1] Wire the conversation surface in `app.py`: empty-state hero with clickable example cards, streaming answer rendering from `AnswerDelta`, and distinct visual treatments for `OffTopic`, `CoverageGap`, `KeyProblem`, and `Failure` (FR-010, FR-021, contracts/ui-contract.md rules 1–2)
+- [X] T041 [US1] Render the sources list under each answer in `app.py` from the `Sources` event: expert, work title, and link for every contributing chunk (FR-011 baseline; deep-link polish in US4)
 
 **Checkpoint**: 🎯 **MVP reached** — the council answers real questions with citations. Demoable.
 
