@@ -28,13 +28,21 @@ AI PDM LEADERSHIP COUNCIL — FINAL PROJECT SUBMISSION
          This project is CPU-only — no part of the stack uses CUDA — so the
          setting must be CPU basic.
 
-    Switch the hardware to CPU basic, confirm the Space answers a question,
-    then delete this notice and submit.
+      4. The Space repository is currently EMPTY. It holds a single "initial
+         commit" containing only .gitattributes and a default 328-byte README,
+         so the Hub reports NO_APP_FILE — there is no app.py to run. The 97
+         files uploaded by the earlier successful sync are gone, which means
+         the Space was recreated rather than reconfigured. Re-running the
+         GitHub Actions workflow restores the contents; nothing in the source
+         repository was lost.
+
+    Re-run the sync workflow, confirm the Space answers a question, then delete
+    this notice and submit.
 
 1. LINKS
 --------
 
-Hugging Face Space (PUBLIC):   [ NOT YET DEPLOYED — see section 5 ]
+Hugging Face Space (PUBLIC):   https://huggingface.co/spaces/hengkar/ai-pdm-leadership-council
 GitHub repository:             [ https://github.com/hengkar/ai-pdm-leadership-council.git ]
 
 
@@ -141,14 +149,22 @@ syncs this repository to the Space on push to main.
   [X] Commit and push the README short_description fix. The GitHub Actions
       workflow now syncs to the Space successfully.
 
-  [ ] Change hardware from ZeroGPU to CPU basic in Space settings. ZeroGPU
-      requires a @spaces.GPU entry point that a CPU-only app has no reason to
-      define, and the container is stopped without one.
+  [X] Move off ZeroGPU hardware. ZeroGPU requires a @spaces.GPU entry point
+      that a CPU-only app has no reason to define, and stops the container
+      without one. The Space now requests CPU hardware.
+
+  [ ] Re-run the GitHub Actions sync workflow. The Space was recreated and is
+      empty, so it currently has no app.py to run.
+
+  [ ] Consider dropping the hardware tier from CPU Upgrade to CPU basic. CPU
+      Upgrade bills hourly; CPU basic is free and its 16 GB is ample for the
+      roughly 1.25 GB of embedding and reranker weights this app loads. The
+      paid tier buys faster reranking, not feasibility.
 
   [X] First boot verified from the container logs: both models downloaded and
       loaded, and Gradio served on port 7860 in well under a minute.
 
-  [ ] Confirm the Space is set to PUBLIC in its settings.
+  [X] Space visibility confirmed PUBLIC via the Hub API.
 
   [ ] Verify live: paste an API key, press Connect, click a starter question,
       and check the answer arrives with working source links. Every user-facing
