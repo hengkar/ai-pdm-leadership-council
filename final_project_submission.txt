@@ -113,21 +113,36 @@ is deliberately not claimed.
 5. DEPLOYMENT
 -------------
 
-Deployment runs through a GitHub Actions workflow (huggingface/hub-sync) that
-syncs this repository to the Space on every push to main.
+Live and public at
+https://huggingface.co/spaces/hengkar/ai-pdm-leadership-council
+
+A GitHub Actions workflow (huggingface/hub-sync) syncs the repository to the
+Space on every push to main, so the deployed app and the submitted source are
+the same thing by construction.
 
   Verified live in the browser on 2026-08-13:
-    - Space is PUBLIC and reports RUNNING; all 97 repository files present
-    - the README pin of Gradio 5.50.0 took effect over the Space default
     - Connect accepted an OpenAI key and reported "Your key is held for this
-      session only"; no key is stored, logged, or committed
-    - the council sidebar loaded all 8 experts and 31 works, proving the roster
+      session only"
+    - the council sidebar loaded all 8 experts and 31 works, so the roster
       reads correctly from the committed index on a clean deployment
     - "Ask the Council" answered a roadmap-pushback question in the required
       structure and cited three distinct experts with working links
-    - one citation rendered as a bare podcast reference with no episode title or
-      timestamp — the deliberate suppression for works whose upstream episode
-      metadata could not be verified, behaving correctly in production
+    - one citation rendered as a bare podcast reference with no episode title
+      or timestamp — the deliberate suppression for works whose upstream
+      episode metadata could not be verified, behaving correctly in production
+
+  What the Space starts from. Retrieval is served entirely from committed
+  artifacts and nothing is indexed at runtime: data/chunks.jsonl,
+  data/index/embeddings.npy and data/index/bm25.pkl. The vector collection is
+  reassembled in memory at boot rather than shipping a Chroma database, which
+  held the same information in 12.9 MB of mostly SQLite overhead duplicating
+  text already carried in chunks.jsonl.
+
+  What is deliberately not committed. data/curated/ and data/raw/ hold the full
+  text of third-party articles and transcripts. Publishing them in bulk is a
+  different act from using them for retrieval, so they stay local and the
+  collection scripts are committed in their place, leaving the corpus
+  reproducible from source.
 
   Provider availability. The UI offers OpenAI only. The Gemini and Anthropic
   adapters are implemented and contract-tested, but neither has been exercised
@@ -139,40 +154,15 @@ syncs this repository to the Space on every push to main.
   unreachable even by editing the page or replaying a request, and two tests
   pin that down. Re-enabling is a one-line change to that tuple.
 
-  Four deployment issues were found and fixed getting here:
+  Key handling. No API key is committed to the repository or present on the
+  Space. The user supplies their own, it is held in browser-session memory
+  only, never written to disk, and redacted from log records by an active
+  scrubber.
 
-    1. The build-time vector store was 12.9 MB, over the Hub's 10 MB limit for
-       files not tracked by Git LFS. Rather than adopt LFS, the build now ships
-       embeddings.npy (1.13 MB) and the runtime reassembles the collection in
-       memory at boot; the database was almost entirely SQLite overhead
-       duplicating text already carried in chunks.jsonl. Git history was
-       rewritten to purge the blob, since the Hub validates every commit in a
-       push rather than only the final tree.
-
-    2. short_description in the README frontmatter was 86 characters against a
-       60-character limit, failing metadata validation after the upload had
-       already begun. Now 57.
-
-    3. The Space was provisioned on ZeroGPU, which requires a function
-       decorated with @spaces.GPU and stops the container when it finds none.
-       The logs showed the application starting correctly and serving on port
-       7860 before being stopped, so this was a hardware setting rather than an
-       application fault; this project is CPU-only.
-
-    4. The Space was recreated at one point, leaving it empty and reporting
-       NO_APP_FILE. Re-running the sync workflow restored all 97 files.
-
-  Space settings: License blank (all rights reserved). The rationale is in
-  README.md under "License and content ownership": a repository-wide open
-  licence would purport to grant rights over the third-party excerpts under
-  data/, which this project does not own.
-
-  Confirmed before deployment:
-    - .env is NOT tracked by git; the development key does not reach the Space
-    - data/curated/ and data/raw/ are NOT tracked; third-party full text stays local
-    - data/chunks.jsonl, data/index/embeddings.npy and data/index/bm25.pkl ARE
-      tracked, so the Space has everything retrieval needs
-    - no file anywhere in git history exceeds 10 MB
+  Licence. Left blank (all rights reserved), for the reason given in README.md
+  under "License and content ownership": a repository-wide open licence would
+  purport to grant rights over the third-party excerpts the corpus is built
+  from, which this project does not own.
 
 6. EVALUATION RESULTS
 ---------------------
