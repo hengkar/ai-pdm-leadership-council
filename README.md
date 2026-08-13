@@ -1,3 +1,16 @@
+---
+title: AI PDM Leadership Council
+emoji: 🏛
+colorFrom: indigo
+colorTo: gray
+sdk: gradio
+sdk_version: 5.50.0
+python_version: "3.13"
+app_file: app.py
+pinned: false
+short_description: Situational PM advice grounded in product leaders' published thinking, with citations.
+---
+
 # 🏛 AI PDM Leadership Council
 
 Situational advice for product managers, grounded in the published thinking of
