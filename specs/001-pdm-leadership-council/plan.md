@@ -70,6 +70,12 @@ spends nothing (Principle I: example cards are static text; no provider call unt
 submits), reads the roster from committed index metadata (Principle II: no runtime corpus
 access), and displays experts by their canonical names (Principle III). Added `ui_content.py`,
 `rag/roster.py`, and `contracts/ui-contract.md` to the design; no principle tension arose.
+**Re-audit 2026-08-13 (spec FR-022/FR-023 added after live UI defects)**: PASS, and Principle I
+is now better served rather than merely unbroken. Two event-sequence bugs had made a validated
+key unusable and allowed a key to outlive the provider it was issued for; the second was a real
+Principle I hazard, since a key could have been sent to a provider it was never meant for.
+Both are now fixed, contract-documented, and regression-tested. No design change beyond the
+session-key lifecycle table in `contracts/ui-contract.md`.
 
 ## Project Structure
 

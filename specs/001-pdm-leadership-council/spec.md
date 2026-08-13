@@ -56,6 +56,8 @@ Before asking anything, the user chooses one of three AI providers (OpenAI, Goog
 1. **Given** a fresh session, **When** the user submits a question without entering a key, **Then** the app explains a key is required and how to provide one, and makes no paid calls.
 2. **Given** an invalid or expired key, **When** the user first tries to use it, **Then** they see a clear error identifying the problem before any answer is attempted.
 3. **Given** a valid key was used, **When** the session ends, **Then** the key is not retained anywhere — a new session starts with no key present.
+4. **Given** a key that has been accepted, **When** the user interacts with any other control — selecting an example situation, changing mode, moving focus away from the key field — **Then** the key remains in force and questions continue to work without re-entering it.
+5. **Given** a key accepted for one provider, **When** the user switches to a different provider, **Then** the previous key is discarded and a key for the newly chosen provider is required before asking again.
 
 ---
 
@@ -143,6 +145,8 @@ and verify every roster expert is represented and the app can answer from the re
 - **FR-019**: The project MUST implement at least 5 of the course assignment's optional functionalities and list the implemented ones in the README.
 - **FR-020**: The knowledge base MUST draw on at least two independent public source collections (e.g., experts' own blogs/newsletters and a public podcast-interview transcript archive), with the collection evidence reviewable in the repository.
 - **FR-021**: On first visit (empty conversation), the app MUST offer a small set of example PM situations that can be selected to start a conversation, and MUST show the expert roster so the user can see whose thinking the council draws on before asking anything.
+- **FR-022**: Once a key has been accepted, it MUST remain in force for the rest of the session regardless of any other interaction, and MUST NOT need to be re-entered until the user supplies a different key or changes provider.
+- **FR-023**: Changing the selected provider MUST discard the current key and require a key for the newly selected provider, so the app can never send a key to a provider it was not issued for.
 
 ### Key Entities
 

@@ -56,3 +56,10 @@
   situations + visible expert roster) and US1 acceptance scenario 4. Layout specifics (sidebar,
   cards, provider chip — from the Towards AI tutor reference) were deliberately kept OUT of the
   spec and recorded in research.md R13 / PLAN_QUERY_FLOW.md instead. Revalidated: all items pass.
+- **2026-08-13 FR-022/FR-023 addition** (defects found by using the running app): added US3
+  acceptance scenarios 4–5 and FR-022/FR-023 covering the session key lifecycle — an accepted key
+  survives incidental UI events, and changing provider discards it. Both were genuine spec gaps
+  rather than implementation slips: nothing previously said what should happen to a key *after*
+  acceptance, so the implementation was free to get it wrong and did. The mechanism (blur events,
+  field clearing) stays out of the spec and lives in contracts/ui-contract.md. Revalidated: all
+  items pass; the new requirements are testable and free of implementation detail.

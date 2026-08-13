@@ -53,28 +53,78 @@ class SessionState:
 # --- key handling -----------------------------------------------------------
 
 
-def check_key(provider_label: str, api_key: str, state: SessionState | None):
-    """Validate the pasted key and report the outcome in plain language (FR-009)."""
+def connect(provider_label: str, api_key: str, state: SessionState | None):
+    """Validate the key on an explicit Connect (FR-009, FR-022).
+
+    Connecting is a deliberate act, not something inferred from focus moving.
+    An earlier version validated on `blur`, which meant that clearing the field
+    after a successful check — done so the key is not left in the DOM — caused
+    the next incidental blur to arrive empty and revoke a perfectly good key.
+    Binding to a button removes that entire class of failure: nothing happens to
+    the key unless the user asks for it to.
+    """
     state = state or SessionState()
     state.provider = _LABEL_TO_PROVIDER.get(provider_label, Provider.OPENAI)
-    state.api_key = (api_key or "").strip()
+    typed = (api_key or "").strip()
 
-    if not state.api_key:
-        state.key_status = None
-        return state, _status_html(None), gr.update(interactive=False), ""
+    if not typed:
+        # Guard anyway: an empty submission must never downgrade a live key.
+        return (
+            state,
+            _status_html(state.key_status),
+            gr.update(interactive=state.is_ready),
+            "",
+        )
 
+    state.api_key = typed
     state.key_status = make_client(state.provider, state.api_key).validate_key()
-    ready = state.key_status is KeyStatus.OK
 
-    # Returning "" clears the visible field; the value lives on in session state.
-    return state, _status_html(state.key_status), gr.update(interactive=ready), ""
+    return (
+        state,
+        _status_html(state.key_status, state.provider),
+        gr.update(interactive=state.is_ready),
+        "",  # clear the visible field; the value lives on in session state
+    )
 
 
-def _status_html(status: KeyStatus | None) -> str:
+def disconnect(state: SessionState | None):
+    """Drop the key on request, so 'connected' is reversible without a reload."""
+    state = state or SessionState()
+    state.api_key = ""
+    state.key_status = None
+    return state, _status_html(None), gr.update(interactive=False), ""
+
+
+def switch_provider(provider_label: str, state: SessionState | None):
+    """Changing provider invalidates the key — one provider's key is not another's.
+
+    Without this the dropdown could read "Anthropic" while the session quietly
+    kept using the previously validated OpenAI key.
+    """
+    state = state or SessionState()
+    provider = _LABEL_TO_PROVIDER.get(provider_label, Provider.OPENAI)
+
+    if provider is not state.provider:
+        state.provider = provider
+        state.api_key = ""
+        state.key_status = None
+
+    return (
+        state,
+        gr.update(value=_key_link(provider_label)),
+        _status_html(state.key_status),
+        gr.update(interactive=state.is_ready),
+    )
+
+
+def _status_html(status: KeyStatus | None, provider: Provider | None = None) -> str:
     if status is None:
-        return "<span style='opacity:.6'>Paste a key to begin.</span>"
-    colour = "#1a7f37" if status is KeyStatus.OK else "#b3261e"
-    return f"<span style='color:{colour}'>{KEY_STATUS_MESSAGES[status]}</span>"
+        return "<span style='opacity:.6'>Not connected — paste a key and press Connect.</span>"
+    if status is KeyStatus.OK:
+        who = f" to {PROVIDER_LABELS[provider]}" if provider else ""
+        return (f"<span style='color:#1a7f37'><strong>Connected{who}.</strong> "
+                "Your key is held for this session only.</span>")
+    return f"<span style='color:#b3261e'>{KEY_STATUS_MESSAGES[status]}</span>"
 
 
 # --- conversation -----------------------------------------------------------
@@ -201,7 +251,13 @@ def build_ui() -> gr.Blocks:
                     value=PROVIDER_LABELS[Provider.OPENAI],
                     label="AI provider",
                 )
-                key_box = gr.Textbox(label="API key", type="password", placeholder="sk-…")
+                key_box = gr.Textbox(
+                    label="API key", type="password", placeholder="sk-…",
+                    info="Nothing is sent until you press Connect.",
+                )
+                with gr.Row():
+                    connect_btn = gr.Button("Connect", variant="primary", size="sm")
+                    disconnect_btn = gr.Button("Disconnect", size="sm")
                 key_link = gr.Markdown(_key_link(PROVIDER_LABELS[Provider.OPENAI]))
                 status = gr.HTML(_status_html(None))
                 gr.Markdown(f"<small>{ui_content.KEY_NOTE}</small>")
@@ -239,10 +295,13 @@ def build_ui() -> gr.Blocks:
 
         # --- wiring ---
         provider_picker.change(
-            lambda label: gr.update(value=_key_link(label)), provider_picker, key_link
+            switch_provider, [provider_picker, state], [state, key_link, status, submit]
         )
-        for trigger in (key_box.submit, key_box.blur):
-            trigger(check_key, [provider_picker, key_box, state], [state, status, submit, key_box])
+        key_inputs = [provider_picker, key_box, state]
+        key_outputs = [state, status, submit, key_box]
+        connect_btn.click(connect, key_inputs, key_outputs)
+        key_box.submit(connect, key_inputs, key_outputs)  # Enter is an explicit act too
+        disconnect_btn.click(disconnect, [state], key_outputs)
 
         mode_picker.change(
             lambda label: gr.update(visible=label == EXPERT_LABEL), mode_picker, expert_picker

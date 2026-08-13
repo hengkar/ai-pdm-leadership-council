@@ -15,6 +15,27 @@ from [pipeline-events](./pipeline-events.md). Layout rationale lives in research
 | Main — sources panel | One entry per `Citation` | 📄 title → original URL; 🎙 episode + mm:ss → timestamped link. Rendered only from the `Sources` event (FR-011) |
 | Input bar | Question box, provider chip, submit | Submit disabled while no key is present; a fresh submit supersedes any in-flight answer (pipeline guarantee 4) |
 
+## Session key lifecycle
+
+Added after two bugs in this exact area reached a running app. Both came from
+one unstated assumption: that the key *field* is the record of truth. It is not
+— it is an input. The record of truth is session state.
+
+| Trigger | Required behaviour |
+|---|---|
+| Key entered and accepted | Store in session state; clear the visible field so the value is not left in the DOM; enable asking |
+| Validation handler fires with an **empty** field | **No change.** An empty input must never revoke a key already accepted — this is the direct consequence of clearing the field above, and the source of the "Key verified / API key problem" contradiction |
+| A different key typed | Replace and re-validate |
+| Provider changed | Discard the key and require a new one (FR-023); a key issued for one provider must never be sent to another |
+| Same provider re-selected | No-op — must not cost the user their key |
+| Session ends | Everything discarded (FR-008) |
+
+The general rule: **only an explicit user action may invalidate an accepted
+key.** Incidental UI events — focus changes, clicks elsewhere, re-render — must
+leave it alone. Any handler wired to an incidental event (`blur`, `change`)
+therefore needs to distinguish "the user cleared this" from "this happens to be
+empty right now".
+
 ## Rules
 
 1. **No business logic in `app.py`**: it may call `rag.pipeline.answer(...)`, `rag.roster.load()`,

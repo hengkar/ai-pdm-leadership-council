@@ -205,6 +205,26 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 
 ---
 
+## Phase 10: Session Key Lifecycle (US3 follow-up) 🔑
+
+**Why this phase exists**: two defects reached a running app in this exact area,
+neither caught by 155 passing tests, because both are event-sequence bugs that
+only appear when real browser events fire in order. Found by using the app.
+
+**Goal**: an accepted key stays usable for the session, and never outlives the
+provider it was issued for.
+
+**Independent Test**: paste a key, click an example card, and get an answer
+(FR-022); then switch provider and confirm a new key is required (FR-023).
+
+- [X] T061 [US3] Fix `check_key` in `app.py` so an empty key field does not revoke an already-accepted key. Validation clears the visible field for hygiene, so the next `blur` arrives empty while the key is still good in session state — the field is an input, not the record of truth (FR-022)
+- [X] T062 [US3] Add `switch_provider` in `app.py` so changing provider discards the key and requires a new one, and wire it to the provider dropdown. Prevents a key being sent to a provider it was not issued for (FR-023, Constitution I)
+- [X] T063 [P] [US3] Regression tests in `tests/unit/test_key_lifecycle.py` covering the empty-blur sequence, key replacement, provider switch, same-provider no-op, and no-provider-call-without-a-key
+
+**Checkpoint**: the session key behaves correctly across real UI event sequences
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
