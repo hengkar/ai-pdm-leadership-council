@@ -1,0 +1,24 @@
+# Python environment (Constitution IV — venv is never committed)
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Secrets — DEV_LLM_API_KEY lives in the environment, never on disk
+.env
+.env.*
+
+# Fetch cache — regenerable from data_collection/fetch.py
+data/raw/
+
+# Curated bodies hold the FULL text of third-party articles and transcripts.
+# Committing them to a public repo/Space would republish other people's work in
+# bulk, which is a different thing from using it for retrieval. They are
+# regenerable from the committed scripts, so they stay local; the scripts plus
+# data/corpus_manifest.json are the reviewable evidence of collection.
+# (Revisit only with explicit permission from the rights holders.)
+data/curated/
+
+# Local tooling
+.pytest_cache/
+.DS_Store

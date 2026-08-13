@@ -37,10 +37,10 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 
 **Purpose**: Project skeleton and dependencies
 
-- [ ] T001 Create `requirements.txt` at repo root with pinned deps from plan.md Technical Context (gradio, chromadb, sentence-transformers, rank_bm25, openai, google-genai, anthropic, pydantic, trafilatura, beautifulsoup4, pymupdf, python-frontmatter, PyYAML, pytest)
-- [ ] T002 [P] Create `.gitignore` at repo root excluding `.venv/`, `data/raw/`, `__pycache__/`, `.env`, `*.pyc`
-- [ ] T003 [P] Create package skeletons: `rag/__init__.py`, `data_collection/__init__.py`, `evaluation/.gitkeep`, `tests/unit/`, `tests/contract/`, `tests/integration/`
-- [ ] T004 Install dependencies with `.venv/bin/pip install -r requirements.txt` and verify imports in `tests/unit/test_imports.py`
+- [X] T001 Create `requirements.txt` at repo root with pinned deps from plan.md Technical Context (gradio, chromadb, sentence-transformers, rank_bm25, openai, google-genai, anthropic, pydantic, trafilatura, beautifulsoup4, pymupdf, python-frontmatter, PyYAML, pytest)
+- [X] T002 [P] Create `.gitignore` at repo root excluding `.venv/`, `data/raw/`, `__pycache__/`, `.env`, `*.pyc`
+- [X] T003 [P] Create package skeletons: `rag/__init__.py`, `data_collection/__init__.py`, `evaluation/.gitkeep`, `tests/unit/`, `tests/contract/`, `tests/integration/`
+- [X] T004 Install dependencies with `.venv/bin/pip install -r requirements.txt` and verify imports in `tests/unit/test_imports.py`
 
 ---
 
@@ -50,11 +50,11 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Implement pydantic v2 models per data-model.md in `data_collection/schemas.py`: `SourceWork`, `Chunk`, `EvalCase`, `ContentType` enum, and `SCHEMA_VERSION` constant; enforce required attribution fields (`expert`, `doc_id`, `url`) and the rule that `timestamp_s` is required iff `content_type == podcast_transcript`
-- [ ] T006 [P] Create the expert/source registry in `data_collection/sources.yaml` with the 8 roster experts (FR-017), per-source adapter configs, and the pinned-SHA `github_repo` entry with its episode-slug→expert map (research.md R7)
-- [ ] T007 [P] Define the ~25-term controlled topic vocabulary in `data_collection/vocabulary.py` (research.md R9)
-- [ ] T008 [P] Implement the shared error taxonomy and key-scrubbing log filter in `rag/errors.py`: `KeyStatus`, `ProviderError`, and a scrubber guaranteeing no API key reaches logs or exception text (contracts/provider-protocol.md rule 1, Constitution I)
-- [ ] T009 [P] Implement path/model constants in `rag/config.py`: index paths, embedding and reranker model ids, per-provider model ids, retrieval top-k values, and the rerank score threshold
+- [X] T005 Implement pydantic v2 models per data-model.md in `data_collection/schemas.py`: `SourceWork`, `Chunk`, `EvalCase`, `ContentType` enum, and `SCHEMA_VERSION` constant; enforce required attribution fields (`expert`, `doc_id`, `url`) and the rule that `timestamp_s` is required iff `content_type == podcast_transcript`
+- [X] T006 [P] Create the expert/source registry in `data_collection/sources.yaml` with the 8 roster experts (FR-017), per-source adapter configs, and the pinned-SHA `github_repo` entry with its episode-slug→expert map (research.md R7)
+- [X] T007 [P] Define the ~25-term controlled topic vocabulary in `data_collection/vocabulary.py` (research.md R9)
+- [X] T008 [P] Implement the shared error taxonomy and key-scrubbing log filter in `rag/errors.py`: `KeyStatus`, `ProviderError`, and a scrubber guaranteeing no API key reaches logs or exception text (contracts/provider-protocol.md rule 1, Constitution I)
+- [X] T009 [P] Implement path/model constants in `rag/config.py`: index paths, embedding and reranker model ids, per-provider model ids, retrieval top-k values, and the rerank score threshold
 
 **Checkpoint**: Schemas, registry, and safety plumbing ready — story work can begin
 
@@ -68,20 +68,20 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 
 ### Tests for User Story 5
 
-- [ ] T010 [P] [US5] Unit test transcript speaker-turn attribution in `tests/unit/test_parse_transcript.py`: chunks attribute to the guest never the interviewer, and repeat-appearance slugs collapse to one canonical expert
-- [ ] T011 [P] [US5] Unit test chunking invariants in `tests/unit/test_chunk.py`: article chunks never cross work boundaries, transcript chunks never cross question boundaries, podcast chunks always carry `timestamp_s`
-- [ ] T012 [P] [US5] Unit test fetch idempotency in `tests/unit/test_manifest.py`: unchanged content hashes are skipped and produce no duplicate works (US5-AS3)
+- [X] T010 [P] [US5] Unit test transcript speaker-turn attribution in `tests/unit/test_parse_transcript.py`: chunks attribute to the guest never the interviewer, and repeat-appearance slugs collapse to one canonical expert
+- [X] T011 [P] [US5] Unit test chunking invariants in `tests/unit/test_chunk.py`: article chunks never cross work boundaries, transcript chunks never cross question boundaries, podcast chunks always carry `timestamp_s`
+- [X] T012 [P] [US5] Unit test fetch idempotency in `tests/unit/test_manifest.py`: unchanged content hashes are skipped and produce no duplicate works (US5-AS3)
 
 ### Implementation for User Story 5
 
-- [ ] T013 [US5] Implement the adapter framework and `github_repo` adapter in `data_collection/fetch.py`: shallow clone pinned to SHA, council episodes only, manifest write to `data/raw/manifest.json`, `--expert` and `--force` flags
-- [ ] T014 [US5] Implement transcript parsing in `data_collection/parse.py`: frontmatter extraction, `Name (HH:MM:SS):` turn splitting, guest attribution, sponsor/intro stripping, and the known-quirk handling from PLAN_TRANSCRIPTS.md (duplicate dirs, unreliable frontmatter durations)
-- [ ] T015 [P] [US5] Add the WordPress/RSS adapter to `data_collection/fetch.py` for SVPG, Product Talk, and caseyaccidental.com (rate-limited, robots-respecting)
-- [ ] T016 [P] [US5] Add the Substack adapter to `data_collection/fetch.py` for free posts only (Biddle, Zhuo, Verna)
-- [ ] T017 [P] [US5] Add HTML and PDF parsing to `data_collection/parse.py` using trafilatura and pymupdf, with boilerplate stripping, content-hash dedupe, and the ≥300-word quality gate
-- [ ] T018 [US5] Implement the offline enrichment pass in `data_collection/enrich.py`: structured-JSON topic tags from the controlled vocabulary plus 2-sentence summaries, reading `DEV_LLM_API_KEY` from env only (Constitution II, US5-AS4)
-- [ ] T019 [US5] Implement both chunking strategies in `data_collection/chunk.py`: heading-aware ~450-token article chunks with `heading_path`, and Q&A-unit transcript chunks with start timestamps; write `data/chunks.jsonl`
-- [ ] T020 [US5] Implement `data_collection/build_index.py`: local `bge-small-en-v1.5` embeddings into the persistent Chroma collection `council` with full metadata, BM25 pickle, `SCHEMA_VERSION` stamping, and a per-expert/per-topic stats report
+- [X] T013 [US5] Implement the adapter framework and `github_repo` adapter in `data_collection/fetch.py`: shallow clone pinned to SHA, council episodes only, manifest write to `data/raw/manifest.json`, `--expert` and `--force` flags
+- [X] T014 [US5] Implement transcript parsing in `data_collection/parse.py`: frontmatter extraction, `Name (HH:MM:SS):` turn splitting, guest attribution, sponsor/intro stripping, and the known-quirk handling from PLAN_TRANSCRIPTS.md (duplicate dirs, unreliable frontmatter durations)
+- [X] T015 [P] [US5] Add the WordPress/RSS adapter to `data_collection/fetch.py` for SVPG, Product Talk, and caseyaccidental.com (rate-limited, robots-respecting)
+- [~] T016 [P] [US5] ~~Substack adapter~~ — **dropped at user's direction.** Biddle, Zhuo and Verna are represented through the podcast archive instead.
+- [X] T017 [P] [US5] Add HTML and PDF parsing to `data_collection/parse.py` using trafilatura and pymupdf, with boilerplate stripping, content-hash dedupe, and the ≥300-word quality gate
+- [X] T018 [US5] Implement the offline enrichment pass in `data_collection/enrich.py`: structured-JSON topic tags from the controlled vocabulary plus 2-sentence summaries, reading `DEV_LLM_API_KEY` from env only (Constitution II, US5-AS4)
+- [X] T019 [US5] Implement both chunking strategies in `data_collection/chunk.py`: heading-aware ~450-token article chunks with `heading_path`, and Q&A-unit transcript chunks with start timestamps; write `data/chunks.jsonl`
+- [X] T020 [US5] Implement `data_collection/build_index.py`: local `bge-small-en-v1.5` embeddings into the persistent Chroma collection `council` with full metadata, BM25 pickle, `SCHEMA_VERSION` stamping, and a per-expert/per-topic stats report
 - [ ] T021 [US5] Run the full pipeline end to end and commit `data/curated/`, `data/chunks.jsonl`, and `data/index/`; paste the stats report into a corpus section of `README.md`
 
 **Checkpoint**: A committed, attributed, reproducible corpus exists — retrieval work can begin
@@ -104,7 +104,7 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 - [ ] T024 [US3] Define the `LLMClient` protocol, `Message`, and `ProviderName` types in `rag/llm.py` per contracts/provider-protocol.md
 - [ ] T025 [P] [US3] Implement the OpenAI adapter (`gpt-4o-mini`) in `rag/llm.py` with structured-output `classify` and streaming `stream`
 - [ ] T026 [P] [US3] Implement the Gemini adapter (`gemini-2.0-flash`) in `rag/llm.py`
-- [ ] T027 [P] [US3] Implement the Anthropic adapter (`claude-haiku`) in `rag/llm.py`
+- [ ] T027 [P] [US3] Implement the Anthropic adapter (`claude-haiku-4-5`) in `rag/llm.py`
 - [ ] T028 [US3] Implement `make_client(provider, api_key)` and the ~1-token `validate_key` ping in `rag/llm.py`, mapping all provider failures to the shared `KeyStatus`/`ProviderError` taxonomy (FR-009)
 - [ ] T029 [US3] Implement `SessionState` in `app.py` as `gr.State` holding provider, key, and validation flag — never persisted, never echoed back into the field (FR-008, contracts/ui-contract.md)
 - [ ] T030 [US3] Build the Gradio Blocks shell in `app.py`: sidebar provider selector, masked key field, key-status indicator, and submit disabled until a key is present
@@ -242,7 +242,7 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 # Launch the three provider adapters together (same protocol, separate implementations):
 Task: "Implement the OpenAI adapter (gpt-4o-mini) in rag/llm.py"
 Task: "Implement the Gemini adapter (gemini-2.0-flash) in rag/llm.py"
-Task: "Implement the Anthropic adapter (claude-haiku) in rag/llm.py"
+Task: "Implement the Anthropic adapter (claude-haiku-4-5) in rag/llm.py"
 
 # Launch both contract test suites together:
 Task: "Contract tests for all three adapters in tests/contract/test_provider_protocol.py"

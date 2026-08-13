@@ -1,0 +1,85 @@
+# Expert / source registry — the single roster for the whole project.
+#
+# Code never hardcodes expert names: the UI roster, router validation and eval
+# slicing all trace back to this file (via metadata baked into the index).
+# Adding an expert is a change here, not a code change.
+#
+# Sourcing policy: publicly available material only, modest per-expert volume,
+# always cited back to the original. See "Note on Sourcing" in PLAN.md.
+
+experts:
+  # svpg.com is deliberately excluded. Its robots.txt allows ordinary crawlers
+  # but disallows every major AI ingestion crawler (ClaudeBot, GPTBot,
+  # Google-Extended, CCBot, Amazonbot, Applebot-Extended, Bytespider,
+  # meta-externalagent). That is an explicit opt-out from exactly this kind of
+  # use, so we do not fetch it under a different user-agent. Marty Cagan is
+  # represented through his podcast appearance instead, which is published by a
+  # different rights holder in an archive intended for AI use.
+  - name: Marty Cagan
+    slug: marty-cagan
+    sources: []
+
+  - name: Teresa Torres
+    slug: teresa-torres
+    sources:
+      - type: wordpress
+        url: https://www.producttalk.org/
+        max_works: 40
+
+  - name: Casey Winters
+    slug: casey-winters
+    sources:
+      - type: wordpress
+        url: https://caseyaccidental.com/
+        max_works: 30
+
+  - name: Gibson Biddle
+    slug: gibson-biddle
+    sources: []
+
+  - name: Julie Zhuo
+    slug: julie-zhuo
+    sources: []
+
+  - name: Elena Verna
+    slug: elena-verna
+    sources: []
+
+  # Shreyas Doshi and Brian Chesky publish mainly on X and in interviews, so the
+  # podcast archive below is their only fetchable long-form source. They have no
+  # `sources` entry of their own by design.
+  - name: Shreyas Doshi
+    slug: shreyas-doshi
+    sources: []
+
+  - name: Brian Chesky
+    slug: brian-chesky
+    sources: []
+
+# A second, independent public collection (assignment FR-020). Pinned to a
+# commit so the corpus is reproducible; verified 2026-08-12 (303 episodes).
+transcript_archives:
+  - type: github_repo
+    repo: ChatPRD/lennys-podcast-transcripts
+    ref: be8ab89a890a833cbba2c892178f823fff178c65
+    path_template: episodes/{slug}/transcript.md
+    # Council experts only — this is an expert council, not a podcast search
+    # engine. Repeat appearances collapse onto one canonical expert name.
+    episodes:
+      shreyas-doshi: Shreyas Doshi
+      shreyas-doshi-live: Shreyas Doshi
+      brian-chesky: Brian Chesky
+      elena-verna: Elena Verna
+      elena-verna-20: Elena Verna
+      elena-verna-30: Elena Verna
+      elena-verna-40: Elena Verna
+      julie-zhuo: Julie Zhuo
+      julie-zhuo-20: Julie Zhuo
+      marty-cagan: Marty Cagan
+      marty-cagan-20: Marty Cagan
+      casey-winters: Casey Winters
+      # Near-duplicate directory in the upstream repo; kept so the fetch is
+      # faithful, dropped by the content-hash dedupe in parse.py.
+      casey-winters_: Casey Winters
+      gibson-biddle: Gibson Biddle
+      teresa-torres: Teresa Torres
