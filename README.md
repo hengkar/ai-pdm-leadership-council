@@ -219,3 +219,26 @@ tests run against the real index — none of them need an API key or spend money
 | `data_collection/` | Offline pipeline: fetch, parse, enrich, chunk, index |
 | `evaluation/` | Eval dataset, scripts, and results |
 | `specs/001-pdm-leadership-council/` | Spec, plan, contracts, task breakdown |
+
+## License and content ownership
+
+**All rights reserved** for the code in this repository.
+
+The indexed excerpts under `data/` are a separate matter. They are quotations
+from third-party published work — articles and podcast interviews by the named
+product leaders — and they remain the property of their respective authors and
+publishers. They are included solely to support attributed retrieval for this
+educational project, always cited back to the original, and are not offered
+under any license by this repository.
+
+This distinction is deliberate rather than boilerplate. A repository-wide open
+licence would purport to grant rights over material this project does not own,
+which is why one is not applied here.
+
+Anyone wanting to build on this commercially should re-found the corpus on
+content they own or have licensed. The architecture carries over unchanged; the
+corpus does not.
+
+See also the sourcing policy above — publicly available material only, modest
+volume per expert, AI-crawler opt-outs respected, and full source text kept out
+of version control.
