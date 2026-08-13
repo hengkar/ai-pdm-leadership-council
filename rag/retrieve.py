@@ -12,6 +12,7 @@ generation (constitution Principle I).
 
 from __future__ import annotations
 
+import json
 import logging
 import pickle
 from dataclasses import dataclass
@@ -19,11 +20,13 @@ from functools import lru_cache
 from typing import Any
 
 from rag.config import (
+    BM25_PATH,
     CHROMA_COLLECTION,
     CHROMA_DIR,
-    BM25_PATH,
+    CHUNKS_PATH,
     DENSE_TOP_K,
     EMBEDDING_MODEL,
+    EMBEDDINGS_PATH,
     RRF_K,
     SPARSE_TOP_K,
 )
@@ -56,6 +59,35 @@ class RetrievalResult:
         return self.metadata["doc_id"]
 
 
+def _load_chunk_records() -> list[dict[str, Any]]:
+    """Read chunks.jsonl, skipping the schema-version header line."""
+    lines = CHUNKS_PATH.read_text(encoding="utf-8").splitlines()
+    return [json.loads(line) for line in lines[1:] if line.strip()]
+
+
+def _flatten(chunk: dict[str, Any]) -> dict[str, Any]:
+    """Chunk record -> Chroma metadata (scalars only).
+
+    Deliberately mirrors `data_collection.build_index._metadata` rather than
+    importing it: the runtime package must not depend on the offline pipeline
+    (Principle II). The duplication is small and the contract is pinned by
+    tests that read real index metadata.
+    """
+    meta: dict[str, Any] = {
+        "doc_id": chunk["doc_id"],
+        "expert": chunk["expert"],
+        "title": chunk["title"],
+        "url": chunk["url"],
+        "content_type": chunk["content_type"],
+        "episode_verified": bool(chunk.get("episode_verified", True)),
+        "topics": ",".join(chunk.get("topics") or []),
+    }
+    for key in ("date", "heading_path", "timestamp_s", "youtube_url"):
+        if chunk.get(key) is not None:
+            meta[key] = chunk[key]
+    return meta
+
+
 class _Index:
     """Loaded once per process and shared across sessions.
 
@@ -64,13 +96,10 @@ class _Index:
     """
 
     def __init__(self) -> None:
-        import chromadb
         from sentence_transformers import SentenceTransformer
 
         self.embedder = SentenceTransformer(EMBEDDING_MODEL)
-        self.collection = chromadb.PersistentClient(path=str(CHROMA_DIR)).get_collection(
-            CHROMA_COLLECTION
-        )
+        self.collection = self._build_collection()
 
         payload = pickle.loads(BM25_PATH.read_bytes())
         self.bm25 = payload["bm25"]
@@ -85,6 +114,50 @@ class _Index:
         )
         self.documents: dict[str, str] = dict(zip(records["ids"], records["documents"]))
         logger.info("index loaded: %d chunks", len(self.metadata))
+
+    def _build_collection(self):
+        """Assemble the vector collection in memory from committed artifacts.
+
+        The shipped artifacts are `embeddings.npy` plus `chunks.jsonl`, and the
+        collection is reconstructed from them at boot. A persistent Chroma
+        database held the same information in 12.9 MB — mostly SQLite overhead,
+        since the text and metadata are already in chunks.jsonl — and the Hub
+        requires Git LFS for anything past 10 MB. Rebuilding costs a fraction of
+        a second at this corpus size and keeps the deployment a plain repo.
+
+        Falls back to a persistent store if the vectors are absent, so an older
+        local build still works.
+        """
+        import chromadb
+
+        if not EMBEDDINGS_PATH.exists():
+            logger.warning("no %s — falling back to the persistent store", EMBEDDINGS_PATH.name)
+            return chromadb.PersistentClient(path=str(CHROMA_DIR)).get_collection(
+                CHROMA_COLLECTION
+            )
+
+        import numpy as np
+
+        vectors = np.load(EMBEDDINGS_PATH)
+        chunks = _load_chunk_records()
+        if len(chunks) != len(vectors):
+            raise RuntimeError(
+                f"{len(vectors)} embeddings but {len(chunks)} chunks — "
+                "artifacts are out of step; re-run data_collection.build_index"
+            )
+
+        collection = chromadb.EphemeralClient().get_or_create_collection(
+            name=CHROMA_COLLECTION, metadata={"hnsw:space": "cosine"}
+        )
+        for start in range(0, len(chunks), 500):
+            window = slice(start, start + 500)
+            collection.add(
+                ids=[c["chunk_id"] for c in chunks[window]],
+                embeddings=vectors[window].tolist(),
+                documents=[c["text"] for c in chunks[window]],
+                metadatas=[_flatten(c) for c in chunks[window]],
+            )
+        return collection
 
 
 @lru_cache(maxsize=1)

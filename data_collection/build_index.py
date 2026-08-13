@@ -27,6 +27,7 @@ from rag.config import (
     CHROMA_DIR,
     CHUNKS_PATH,
     EMBEDDING_MODEL,
+    EMBEDDINGS_PATH,
     INDEX_DIR,
 )
 
@@ -97,6 +98,14 @@ def build(reset: bool = True) -> None:
         show_progress_bar=True,
         normalize_embeddings=True,  # cosine similarity via dot product
     ).tolist()
+
+    # Committed artifact: vectors only. The runtime rebuilds the collection
+    # from these plus chunks.jsonl, so no multi-megabyte DB is shipped.
+    import numpy as np
+
+    np.save(EMBEDDINGS_PATH, np.asarray(vectors, dtype=np.float32))
+    print(f"embeddings -> {EMBEDDINGS_PATH.name} "
+          f"({EMBEDDINGS_PATH.stat().st_size / 1e6:.1f} MB)")
 
     client = chromadb.PersistentClient(path=str(CHROMA_DIR))
     collection = client.get_or_create_collection(

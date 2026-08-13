@@ -11,6 +11,12 @@ __pycache__/
 # Fetch cache — regenerable from data_collection/fetch.py
 data/raw/
 
+# Build-time vector store. 12.9 MB of mostly SQLite overhead, and the Hub
+# requires Git LFS past 10 MB. The runtime rebuilds the collection in memory
+# from data/index/embeddings.npy (1.2 MB) plus data/chunks.jsonl, both of
+# which ARE committed.
+data/index/chroma/
+
 # Curated bodies hold the FULL text of third-party articles and transcripts.
 # Committing them to a public repo/Space would republish other people's work in
 # bulk, which is a different thing from using it for retrieval. They are

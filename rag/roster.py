@@ -12,7 +12,6 @@ import logging
 from dataclasses import dataclass, field
 from functools import lru_cache
 
-from rag.config import CHROMA_COLLECTION, CHROMA_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -48,21 +47,23 @@ def load() -> tuple[RosterEntry, ...]:
     Cached because it is read on every page load and the index does not change
     while the app is running.
     """
-    import chromadb
+    # Read through the shared index rather than opening a second store of our
+    # own. The runtime assembles its collection in memory from the committed
+    # artifacts, so a roster that went straight to the on-disk database found
+    # nothing on a fresh deployment — an empty sidebar and an empty expert
+    # dropdown, with retrieval otherwise working perfectly.
+    from rag.retrieve import _index
 
-    if not CHROMA_DIR.exists():
-        logger.warning("no index at %s — roster is empty", CHROMA_DIR)
+    try:
+        metadatas = list(_index().metadata.values())
+    except Exception:
+        logger.warning("no usable index — roster is empty", exc_info=True)
         return ()
-
-    collection = chromadb.PersistentClient(path=str(CHROMA_DIR)).get_collection(
-        CHROMA_COLLECTION
-    )
-    records = collection.get(include=["metadatas"])
 
     chunks: dict[str, int] = {}
     works: dict[str, set[str]] = {}
     kinds: dict[str, set[str]] = {}
-    for meta in records["metadatas"]:
+    for meta in metadatas:
         expert = meta["expert"]
         chunks[expert] = chunks.get(expert, 0) + 1
         works.setdefault(expert, set()).add(meta["doc_id"])

@@ -18,8 +18,13 @@ DATA_DIR = PROJECT_ROOT / "data"
 CURATED_DIR = DATA_DIR / "curated"          # committed, offline stage only
 CHUNKS_PATH = DATA_DIR / "chunks.jsonl"     # committed
 INDEX_DIR = DATA_DIR / "index"              # committed — the Space boots from this
-CHROMA_DIR = INDEX_DIR / "chroma"
+CHROMA_DIR = INDEX_DIR / "chroma"          # build-time only, not shipped
 BM25_PATH = INDEX_DIR / "bm25.pkl"
+# Embeddings ship as a plain array and the collection is rebuilt in memory at
+# boot. A persistent Chroma DB was 12.9 MB to hold ~1.2 MB of vectors, since
+# text and metadata already travel in chunks.jsonl — and anything over 10 MB
+# needs Git LFS on the Hub.
+EMBEDDINGS_PATH = INDEX_DIR / "embeddings.npy"
 
 CHROMA_COLLECTION = "council"
 
