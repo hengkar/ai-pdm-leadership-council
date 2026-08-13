@@ -8,7 +8,7 @@ sdk_version: 5.50.0
 python_version: "3.13"
 app_file: app.py
 pinned: false
-short_description: Situational PM advice grounded in product leaders' published thinking, with citations.
+short_description: PM advice grounded in product leaders' published thinking
 ---
 
 # 🏛 AI PDM Leadership Council
