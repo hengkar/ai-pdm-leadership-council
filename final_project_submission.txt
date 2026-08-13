@@ -1,14 +1,35 @@
 AI PDM LEADERSHIP COUNCIL — FINAL PROJECT SUBMISSION
 =====================================================
 
-⚠️  NOT READY TO SUBMIT YET — one mandatory requirement is outstanding.
+⚠️  NOT YET CONFIRMED LIVE — deploy, verify, then delete this notice.
 
-    The project must be deployed to a PUBLIC Hugging Face Space, and it is not
-    deployed yet. Deployment needs a Hugging Face account and token that were
-    not available while building. Everything else is complete.
+    The Space exists and a GitHub Actions workflow syncs the repository to it on
+    every push to main. Two deployment blockers were found and fixed; the fix for
+    the second is committed locally but not yet pushed.
 
-    Fill in the Space URL below once deployed, delete this notice, and submit.
+      1. data/index/chroma/chroma.sqlite3 was 12.9 MB, over the Hub's 10 MB
+         limit for files not tracked by Git LFS. Rather than adopt LFS, the
+         build now ships data/index/embeddings.npy (1.13 MB) and the runtime
+         reassembles the vector collection in memory at boot — the database was
+         almost entirely SQLite overhead duplicating text already carried in
+         chunks.jsonl. Git history was rewritten to purge the blob, since the
+         Hub validates every commit in a push, not just the final tree.
 
+      2. short_description in the README frontmatter was 86 characters against
+         a 60-character limit, which failed metadata validation after the
+         upload had already started. Now 57. With that fixed, the sync
+         completed and the Space built.
+
+      3. The Space was provisioned on ZeroGPU hardware, which requires the
+         application to expose a function decorated with @spaces.GPU and kills
+         the container when it finds none. The container logs show the app
+         itself starting correctly and serving on port 7860 before being
+         stopped, so this was a hardware setting, not an application fault.
+         This project is CPU-only — no part of the stack uses CUDA — so the
+         setting must be CPU basic.
+
+    Switch the hardware to CPU basic, confirm the Space answers a question,
+    then delete this notice and submit.
 
 1. LINKS
 --------
@@ -114,19 +135,47 @@ is deliberately not claimed.
 5. WHAT REMAINS BEFORE SUBMITTING
 ---------------------------------
 
-  [ ] Deploy to a public Hugging Face Space (Gradio SDK).
-      Ship: app.py, ui_content.py, rag/, data/chunks.jsonl, data/index/,
-            requirements.txt, README.md
-      Do NOT ship: .env, data/raw/, data/curated/
-      Then confirm the Space is set to PUBLIC.
+Deployment runs through a GitHub Actions workflow (huggingface/hub-sync) that
+syncs this repository to the Space on push to main.
 
-  [ ] Verify on the live Space: paste a key, press Connect, ask a question,
-      and check that a cited answer comes back.
+  [X] Commit and push the README short_description fix. The GitHub Actions
+      workflow now syncs to the Space successfully.
 
-  [ ] Push the repository to GitHub and add both URLs to section 1 above.
+  [ ] Change hardware from ZeroGPU to CPU basic in Space settings. ZeroGPU
+      requires a @spaces.GPU entry point that a CPU-only app has no reason to
+      define, and the container is stopped without one.
 
-  [ ] Rotate the OpenAI API key that was used during development.
+  [X] First boot verified from the container logs: both models downloaded and
+      loaded, and Gradio served on port 7860 in well under a minute.
 
+  [ ] Confirm the Space is set to PUBLIC in its settings.
+
+  [ ] Verify live: paste an API key, press Connect, click a starter question,
+      and check the answer arrives with working source links. Every user-facing
+      bug in this project was found by running exactly that sequence, so it is
+      worth doing deliberately rather than assuming.
+
+  [ ] Exercise Gemini and Anthropic on the live Space. Both adapters are
+      contract-tested but have never made a real API call; only OpenAI has been
+      run end to end. If a reviewer picks one of the other two, that would be
+      its first live exercise. A few cents covers this.
+
+  [ ] Rotate the OpenAI API key used during development.
+
+  Space settings: License blank (all rights reserved) and CPU Basic hardware,
+  not ZeroGPU — this app is CPU-only and nothing in the stack uses CUDA. The
+  licence rationale is in README.md under "License and content ownership": a
+  repository-wide open licence would purport to grant rights over the
+  third-party excerpts under data/, which this project does not own.
+
+  Verified before deployment:
+    - .env is NOT tracked by git; the development key does not reach the Space
+    - data/curated/ and data/raw/ are NOT tracked; third-party full text stays local
+    - data/chunks.jsonl, data/index/embeddings.npy and data/index/bm25.pkl ARE
+      tracked, so the Space has everything retrieval needs
+    - no file anywhere in git history exceeds 10 MB
+    - a fresh-clone simulation using only tracked files loads all 8 experts,
+      retrieves candidates, and honours the per-expert filter
 
 6. EVALUATION RESULTS
 ---------------------

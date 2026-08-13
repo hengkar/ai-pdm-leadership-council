@@ -284,7 +284,16 @@ def build_ui() -> gr.Blocks:
                     example_buttons = [
                         gr.Button(example.title, size="sm") for example in ui_content.EXAMPLES
                     ]
-                chat = gr.Chatbot(type="messages", height=430, label=None, show_label=False)
+                # allow_tags is pinned rather than left to the default, which
+                # flips to True in Gradio 6: answers are model output, and
+                # anything that looks like a tag should stay text, not render.
+                chat = gr.Chatbot(
+                    type="messages",
+                    height=430,
+                    label=None,
+                    show_label=False,
+                    allow_tags=False,
+                )
                 sources = gr.HTML()
                 question = gr.Textbox(
                     placeholder="Describe your situation…",
