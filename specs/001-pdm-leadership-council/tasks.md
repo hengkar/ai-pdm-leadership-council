@@ -148,14 +148,14 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 
 ### Tests for User Story 2
 
-- [ ] T042 [P] [US2] Test expert-filter purity in `tests/integration/test_expert_mode.py`: with an expert filter applied, 100% of returned chunks belong to that expert across both Chroma and BM25 paths (SC-005)
+- [X] T042 [P] [US2] Test expert-filter purity in `tests/integration/test_expert_mode.py`: with an expert filter applied, 100% of returned chunks belong to that expert across both Chroma and BM25 paths (SC-005)
 
 ### Implementation for User Story 2
 
-- [ ] T043 [US2] Add metadata filtering to `rag/retrieve.py`: Chroma `where={"expert": ...}` plus equivalent post-filtering of BM25 candidates, and optional `content_type` filtering (FR-003, research.md R3)
-- [ ] T044 [US2] Add the expert-mode system prompt to `rag/prompts.py`: answers framed as "in the spirit of {expert}'s published thinking", never first person, with explicit coverage-gap disclosure when excerpts are silent (FR-005, FR-006)
-- [ ] T045 [US2] Handle the `expert_mentioned` route in `rag/pipeline.py` so a council-mode question naming an expert auto-applies that expert's filter (FR-013, quickstart scenario D)
-- [ ] T046 [US2] Add the sidebar roster UI in `app.py`: experts from `rag.roster` with source-kind hints, mode toggle driving selection (all shown in council mode, single-select in expert mode) — never a hardcoded list (contracts/ui-contract.md rule 4)
+- [X] T043 [US2] Add metadata filtering to `rag/retrieve.py`: Chroma `where={"expert": ...}` plus equivalent post-filtering of BM25 candidates, and optional `content_type` filtering (FR-003, research.md R3)
+- [X] T044 [US2] Add the expert-mode system prompt to `rag/prompts.py`: answers framed as "in the spirit of {expert}'s published thinking", never first person, with explicit coverage-gap disclosure when excerpts are silent (FR-005, FR-006)
+- [X] T045 [US2] Handle the `expert_mentioned` route in `rag/pipeline.py` so a council-mode question naming an expert auto-applies that expert's filter (FR-013, quickstart scenario D)
+- [X] T046 [US2] Add the sidebar roster UI in `app.py`: experts from `rag.roster` with source-kind hints, mode toggle driving selection (all shown in council mode, single-select in expert mode) — never a hardcoded list (contracts/ui-contract.md rule 4)
 
 **Checkpoint**: Both product modes work independently
 
@@ -169,13 +169,13 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 
 ### Tests for User Story 4
 
-- [ ] T047 [P] [US4] Test citation construction in `tests/unit/test_citations.py`: citations build from chunk metadata only, podcast citations always include a `&t=` offset matching `timestamp_s`, and no citation can exist without a backing retrieved chunk
+- [X] T047 [P] [US4] Test citation construction in `tests/unit/test_citations.py`: citations build from chunk metadata only, podcast citations always include a `&t=` offset matching `timestamp_s`, and no citation can exist without a backing retrieved chunk
 
 ### Implementation for User Story 4
 
-- [ ] T048 [US4] Implement the `Citation` model and deep-link construction in `rag/pipeline.py`: `youtube_url + "&t=" + timestamp_s` for podcast chunks, plain original URL for written works (FR-011)
-- [ ] T049 [US4] Render the differentiated sources panel in `app.py`: 📄 expert — "title" → link for written works, 🎙 expert on Lenny's Podcast (mm:ss) → timestamped link for episodes
-- [ ] T050 [P] [US4] Add a link-health check in `evaluation/check_links.py` that samples corpus URLs and reports unreachable ones (supports SC-004)
+- [X] T048 [US4] Implement the `Citation` model and deep-link construction in `rag/pipeline.py`: `youtube_url + "&t=" + timestamp_s` for podcast chunks, plain original URL for written works (FR-011)
+- [X] T049 [US4] Render the differentiated sources panel in `app.py`: 📄 expert — "title" → link for written works, 🎙 expert on Lenny's Podcast (mm:ss) → timestamped link for episodes
+- [X] T050 [P] [US4] Add a link-health check in `evaluation/check_links.py` that samples corpus URLs and reports unreachable ones (supports SC-004)
 
 **Checkpoint**: All five user stories independently functional
 
@@ -185,12 +185,14 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 
 **Purpose**: The graded obligations — measured quality, public deployment, documented cost (FR-014, FR-016, FR-018, FR-019)
 
-- [ ] T051 [P] Hand-write ~40 PM questions with expected source doc ids and topic tags in `evaluation/dataset.jsonl` per the `EvalCase` schema
-- [ ] T052 Implement `evaluation/run_retrieval_eval.py`: hit-rate@5 and MRR with dense-only vs hybrid vs hybrid+rerank ablations, emitting a markdown results table (SC-006)
-- [ ] T053 Implement `evaluation/run_answer_eval.py`: LLM-judge faithfulness scoring of ~20 generated answers against their retrieved excerpts, run on `DEV_LLM_API_KEY`
-- [ ] T054 Write `README.md`: project explanation, required API keys by name, cost estimate showing a full trial under $0.50, the list of implemented optional functionalities (≥5, FR-019), evaluation results tables, and corpus/sourcing attribution notes
-- [ ] T055 Deploy to a public Hugging Face Space: push `app.py`, `ui_content.py`, `rag/`, `data/curated/`, `data/chunks.jsonl`, `data/index/`, `requirements.txt`, and `README.md`, excluding `data/raw/` and `.venv/` (FR-016)
-- [ ] T056 Verify on the live Space: cold boot from committed artifacts with no indexing, first token under 5 s, and quickstart scenarios A, B, and F with a real user key (SC-001, SC-007, SC-008)
+- [X] T051 [P] Hand-write ~40 PM questions with expected source doc ids and topic tags in `evaluation/dataset.jsonl` per the `EvalCase` schema
+- [X] T052 Implement `evaluation/run_retrieval_eval.py`: hit-rate@5 and MRR with dense-only vs hybrid vs hybrid+rerank ablations, emitting a markdown results table (SC-006)
+- [X] T053 Implement `evaluation/run_answer_eval.py`: LLM-judge faithfulness scoring of ~20 generated answers against their retrieved excerpts, run on `DEV_LLM_API_KEY`
+- [X] T054 Write `README.md`: project explanation, required API keys by name, cost estimate showing a full trial under $0.50, the list of implemented optional functionalities (≥5, FR-019), evaluation results tables, and corpus/sourcing attribution notes
+- [!] T055 Deploy to a public Hugging Face Space: push `app.py`, `ui_content.py`, `rag/`, `data/curated/`, `data/chunks.jsonl`, `data/index/`, `requirements.txt`, and `README.md`, excluding `data/raw/` and `.venv/` (FR-016)
+      ↳ **BLOCKED — no Hugging Face token available.** Needs your HF account; deployment is also an outward-facing publish I should not do unilaterally.
+- [!] T056 Verify on the live Space: cold boot from committed artifacts with no indexing, first token under 5 s, and quickstart scenarios A, B, and F with a real user key (SC-001, SC-007, SC-008)
+      ↳ **BLOCKED — depends on T055.**
 
 ---
 
@@ -198,7 +200,7 @@ exists to make it possible. This matches plan.md's "Order of Attack".
 
 - [ ] T057 Run the full quickstart validation (scenarios A–K plus G–J) from `specs/001-pdm-leadership-council/quickstart.md` and record results
 - [ ] T058 [P] Add remaining unit tests in `tests/unit/` for router fallbacks, prompt few-shot selection, and roster construction
-- [ ] T059 [P] Measure and tune retrieval + rerank latency on Space-equivalent CPU; document timings in `README.md`
+- [X] T059 [P] Measure and tune retrieval + rerank latency on Space-equivalent CPU; document timings in `README.md`
 - [ ] T060 [P] Sync documentation with as-built reality: `CLAUDE.md` commands section, `PLAN*.md` deviations, and this feature's spec/plan if any decision changed (Constitution V, Development Workflow)
 
 ---

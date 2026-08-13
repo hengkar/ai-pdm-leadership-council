@@ -174,11 +174,14 @@ EXEMPLARS: tuple[Exemplar, ...] = (
 
 @lru_cache(maxsize=1)
 def _exemplar_vectors():
-    from sentence_transformers import SentenceTransformer
+    """Embed the exemplars once, reusing the retrieval embedder.
 
-    from rag.config import EMBEDDING_MODEL
+    Loading a second copy of the same model would cost another ~20 seconds of
+    startup and twice the memory, for identical vectors.
+    """
+    from rag.retrieve import _index
 
-    model = SentenceTransformer(EMBEDDING_MODEL)
+    model = _index().embedder
     return model, model.encode(
         [e.situation for e in EXEMPLARS], normalize_embeddings=True
     )

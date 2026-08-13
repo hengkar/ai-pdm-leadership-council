@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 
 import gradio as gr
 
+import rag
 import ui_content
 from rag import roster
 from rag.config import PROVIDER_KEY_URLS, PROVIDER_LABELS, PROVIDER_MODELS, Mode, Provider
@@ -180,6 +181,9 @@ def _roster_markdown() -> str:
 
 
 def build_ui() -> gr.Blocks:
+    # Load the local models before serving. Left lazy, the ~27s cost lands on
+    # the first question and breaks the five-second first-token budget.
+    rag.warmup()
     experts = roster.names()
 
     with gr.Blocks(title="AI PDM Leadership Council", fill_height=True) as demo:

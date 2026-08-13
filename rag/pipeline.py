@@ -113,15 +113,23 @@ def _citation_for(result: RetrievalResult) -> Citation:
 
 
 def _dedupe_citations(results: list[RetrievalResult]) -> tuple[Citation, ...]:
-    """One citation per source work, in the order the passages were ranked."""
-    seen: set[str] = set()
+    """One citation per distinct thing the reader can click, ranked order.
+
+    Deduping on doc_id alone is not enough. Two works can render to the same
+    citation — that is exactly what happens with the episodes whose upstream
+    metadata collides, since both lose their titles and fall back to naming the
+    show. Keying on what the reader actually sees avoids showing them the same
+    line twice.
+    """
+    seen: set[tuple[str, str]] = set()
     citations: list[Citation] = []
     for result in results:
-        doc_id = result.metadata.get("doc_id", result.chunk_id)
-        if doc_id in seen:
+        citation = _citation_for(result)
+        key = (citation.display, citation.link)
+        if key in seen:
             continue
-        seen.add(doc_id)
-        citations.append(_citation_for(result))
+        seen.add(key)
+        citations.append(citation)
     return tuple(citations)
 
 
