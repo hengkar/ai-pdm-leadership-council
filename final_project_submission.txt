@@ -1,48 +1,18 @@
 AI PDM LEADERSHIP COUNCIL — FINAL PROJECT SUBMISSION
 =====================================================
 
-⚠️  NOT YET CONFIRMED LIVE — deploy, verify, then delete this notice.
+DEPLOYED AND VERIFIED LIVE — 2026-08-13.
 
-    The Space exists and a GitHub Actions workflow syncs the repository to it on
-    every push to main. Two deployment blockers were found and fixed; the fix for
-    the second is committed locally but not yet pushed.
-
-      1. data/index/chroma/chroma.sqlite3 was 12.9 MB, over the Hub's 10 MB
-         limit for files not tracked by Git LFS. Rather than adopt LFS, the
-         build now ships data/index/embeddings.npy (1.13 MB) and the runtime
-         reassembles the vector collection in memory at boot — the database was
-         almost entirely SQLite overhead duplicating text already carried in
-         chunks.jsonl. Git history was rewritten to purge the blob, since the
-         Hub validates every commit in a push, not just the final tree.
-
-      2. short_description in the README frontmatter was 86 characters against
-         a 60-character limit, which failed metadata validation after the
-         upload had already started. Now 57. With that fixed, the sync
-         completed and the Space built.
-
-      3. The Space was provisioned on ZeroGPU hardware, which requires the
-         application to expose a function decorated with @spaces.GPU and kills
-         the container when it finds none. The container logs show the app
-         itself starting correctly and serving on port 7860 before being
-         stopped, so this was a hardware setting, not an application fault.
-         This project is CPU-only — no part of the stack uses CUDA — so the
-         setting must be CPU basic.
-
-      4. The Space repository is currently EMPTY. It holds a single "initial
-         commit" containing only .gitattributes and a default 328-byte README,
-         so the Hub reports NO_APP_FILE — there is no app.py to run. The 97
-         files uploaded by the earlier successful sync are gone, which means
-         the Space was recreated rather than reconfigured. Re-running the
-         GitHub Actions workflow restores the contents; nothing in the source
-         repository was lost.
-
-    Re-run the sync workflow, confirm the Space answers a question, then delete
-    this notice and submit.
+    The Space is public and running, serving all 97 files from the repository.
+    A live end-to-end run was confirmed in the browser: the OpenAI key was
+    pasted and accepted via Connect, the council roster loaded all 8 experts,
+    and "Ask the Council" returned a structured answer with three working
+    source citations.
 
 1. LINKS
 --------
 
-Hugging Face Space (PUBLIC):   https://huggingface.co/spaces/hengkar/ai-pdm-leadership-council
+Hugging Face Space (PUBLIC):   [ https://huggingface.co/spaces/hengkar/ai-pdm-leadership-council ]
 GitHub repository:             [ https://github.com/hengkar/ai-pdm-leadership-council.git ]
 
 
@@ -140,58 +110,73 @@ speech I/O, and prompt caching. Prompt caching in particular was designed for
 is deliberately not claimed.
 
 
-5. WHAT REMAINS BEFORE SUBMITTING
----------------------------------
+5. DEPLOYMENT STATUS AND WHAT REMAINS
+-------------------------------------
 
 Deployment runs through a GitHub Actions workflow (huggingface/hub-sync) that
-syncs this repository to the Space on push to main.
+syncs this repository to the Space on every push to main.
 
-  [X] Commit and push the README short_description fix. The GitHub Actions
-      workflow now syncs to the Space successfully.
+  Verified live in the browser on 2026-08-13:
+    - Space is PUBLIC and reports RUNNING; all 97 repository files present
+    - the README pin of Gradio 5.50.0 took effect over the Space default
+    - Connect accepted an OpenAI key and reported "Your key is held for this
+      session only"; no key is stored, logged, or committed
+    - the council sidebar loaded all 8 experts and 31 works, proving the
+      roster reads correctly from the committed index on a clean deployment
+    - "Ask the Council" answered a roadmap-pushback question in the required
+      structure and cited three distinct experts with working links
+    - one citation rendered as a bare podcast reference with no episode title
+      or timestamp — the deliberate suppression for works whose upstream
+      episode metadata could not be verified, behaving correctly in production
 
-  [X] Move off ZeroGPU hardware. ZeroGPU requires a @spaces.GPU entry point
-      that a CPU-only app has no reason to define, and stops the container
-      without one. The Space now requests CPU hardware.
-
-  [ ] Re-run the GitHub Actions sync workflow. The Space was recreated and is
-      empty, so it currently has no app.py to run.
-
-  [ ] Consider dropping the hardware tier from CPU Upgrade to CPU basic. CPU
-      Upgrade bills hourly; CPU basic is free and its 16 GB is ample for the
-      roughly 1.25 GB of embedding and reranker weights this app loads. The
-      paid tier buys faster reranking, not feasibility.
-
-  [X] First boot verified from the container logs: both models downloaded and
-      loaded, and Gradio served on port 7860 in well under a minute.
-
-  [X] Space visibility confirmed PUBLIC via the Hub API.
-
-  [ ] Verify live: paste an API key, press Connect, click a starter question,
-      and check the answer arrives with working source links. Every user-facing
-      bug in this project was found by running exactly that sequence, so it is
-      worth doing deliberately rather than assuming.
+  Still open:
 
   [ ] Exercise Gemini and Anthropic on the live Space. Both adapters are
-      contract-tested but have never made a real API call; only OpenAI has been
-      run end to end. If a reviewer picks one of the other two, that would be
-      its first live exercise. A few cents covers this.
+      contract-tested and only OpenAI has been run end to end, so a reviewer
+      choosing either one would be its first live exercise. A few cents covers
+      this.
 
   [ ] Rotate the OpenAI API key used during development.
 
-  Space settings: License blank (all rights reserved) and CPU Basic hardware,
-  not ZeroGPU — this app is CPU-only and nothing in the stack uses CUDA. The
-  licence rationale is in README.md under "License and content ownership": a
-  repository-wide open licence would purport to grant rights over the
-  third-party excerpts under data/, which this project does not own.
+  [ ] Optional: drop the hardware tier from CPU Upgrade to CPU basic. CPU
+      Upgrade bills hourly; CPU basic is free and its 16 GB is ample for the
+      roughly 1.25 GB of weights this app loads. The paid tier buys faster
+      reranking, not feasibility.
 
-  Verified before deployment:
+  Deployment notes — four issues were found and fixed getting here:
+
+    1. The build-time vector store was 12.9 MB, over the Hub's 10 MB limit for
+       files not tracked by Git LFS. Rather than adopt LFS, the build now ships
+       embeddings.npy (1.13 MB) and the runtime reassembles the collection in
+       memory at boot; the database was almost entirely SQLite overhead
+       duplicating text already carried in chunks.jsonl. Git history was
+       rewritten to purge the blob, since the Hub validates every commit in a
+       push rather than only the final tree.
+
+    2. short_description in the README frontmatter was 86 characters against a
+       60-character limit, failing metadata validation after the upload had
+       already begun. Now 57.
+
+    3. The Space was provisioned on ZeroGPU, which requires a function
+       decorated with @spaces.GPU and stops the container when it finds none.
+       The logs showed the application starting correctly and serving on port
+       7860 before being stopped, so this was a hardware setting rather than an
+       application fault; this project is CPU-only.
+
+    4. The Space was recreated at one point, leaving it empty and reporting
+       NO_APP_FILE. Re-running the sync workflow restored all 97 files.
+
+  Space settings: License blank (all rights reserved). The rationale is in
+  README.md under "License and content ownership": a repository-wide open
+  licence would purport to grant rights over the third-party excerpts under
+  data/, which this project does not own.
+
+  Confirmed before deployment:
     - .env is NOT tracked by git; the development key does not reach the Space
     - data/curated/ and data/raw/ are NOT tracked; third-party full text stays local
     - data/chunks.jsonl, data/index/embeddings.npy and data/index/bm25.pkl ARE
       tracked, so the Space has everything retrieval needs
     - no file anywhere in git history exceeds 10 MB
-    - a fresh-clone simulation using only tracked files loads all 8 experts,
-      retrieves candidates, and honours the per-expert filter
 
 6. EVALUATION RESULTS
 ---------------------
